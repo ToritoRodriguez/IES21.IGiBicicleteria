@@ -1,0 +1,68 @@
+-- Insertar personas
+INSERT INTO personas (nombre, apellido, dni, telefono, email)
+VALUES 
+('Juan', 'Perez', 12345678, '1234567890', 'juan.perez@example.com'),
+('Maria', 'Lopez', 87654321, '0987654321', 'maria.lopez@example.com'),
+('Carlos', 'Gomez', 11223344, '1122334455', 'carlos.gomez@example.com'),
+('Ana', 'Martinez', 99887766, '9988776655', 'ana.martinez@example.com');
+
+-- Insertar clientes
+INSERT INTO clientes (id_persona, codigo, cuil)
+VALUES 
+(1, 'CL123', '20-12345678-9'),
+(2, 'CL456', '20-98765432-1');
+
+-- Insertar vendedores
+INSERT INTO vendedores (id_persona, codigo, sucursal, cuit)
+VALUES 
+(3, 'VE123', 'Sucursal 1', '20-23456789-0'),
+(4, 'VE456', 'Sucursal 2', '20-34567890-1');
+
+-- Insertar proveedores
+INSERT INTO proveedores (id_persona, codigo, nombre_fantasia, cuit)
+VALUES 
+(1, 'PR123', 'Proveedor A', '20-45678901-2'),
+(2, 'PR456', 'Proveedor B', '20-56789012-3');
+
+-- Insertar categorías
+INSERT INTO categorias (categoria, tipo)
+VALUES 
+('Bicicletas', 'BICICLETA'),
+('Accesorios', 'ACCESORIO'),
+('Repuestos', 'REPUESTO');
+
+-- Insertar marcas
+INSERT INTO marcas (marca)
+VALUES 
+('Marca A'),
+('Marca B'),
+('Marca C');
+
+-- Insertar modelos
+INSERT INTO modelos (id_marca, modelo, descripcion, rodado)
+VALUES 
+(1, 'Modelo A', 'Bicicleta de montaña de alta calidad', 'RODADO29'),
+(2, 'Modelo B', 'Bicicleta de ruta con frenos de disco', 'RODADO27'),
+(3, 'Modelo C', 'Bicicleta urbana, ligera y cómoda', 'RODADO24');
+
+-- Insertar productos
+INSERT INTO productos (id_categoria, id_modelo, id_proveedor, cantidad, nombre, descripcion, precio, path_imagen)
+VALUES 
+(1, 1, 1, 10, 'Bicicleta Modelo A', 'Bicicleta de montaña modelo A', 500.00, 'path/to/imageA.jpg'),
+(1, 2, 2, 5, 'Bicicleta Modelo B', 'Bicicleta de ruta con frenos de disco', 450.00, 'path/to/imageB.jpg'),
+(2, 3, 1, 20, 'Casco Protector', 'Casco de seguridad para bicicleta', 25.00, 'path/to/imageC.jpg'),
+(3, 1, 2, 30, 'Cámara de Aire', 'Cámara de aire para bicicleta RODADO29', 5.00, 'path/to/imageD.jpg');
+
+-- Insertar pedidos
+INSERT INTO pedido (fecha, id_vendedor, id_cliente, estado, total_pedido)
+VALUES 
+('2024-11-01', 1, 1, 'Pendiente', 1000.00),
+('2024-11-02', 2, 2, 'Completado', 500.00);
+
+-- Insertar detalles de pedido
+INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio, descuento, total)
+VALUES 
+(1, 1, 2, 500.00, NULL, 1000.00), -- Pedido 1, Producto 1
+(1, 2, 1, 450.00, 10, 405.00), -- Pedido 1, Producto 2 con descuento
+(2, 3, 3, 25.00, NULL, 75.00),  -- Pedido 2, Producto 3
+(2, 4, 2, 5.00, NULL, 10.00);   -- Pedido 2, Producto 4
