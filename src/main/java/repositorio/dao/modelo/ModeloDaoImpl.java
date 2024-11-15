@@ -146,7 +146,7 @@ public class ModeloDaoImpl implements IDaoModelo {
         sqlQuery.append("WHERE 1=1");
 
         HashMap<Integer, Object> param = new HashMap<>();
-        int index = 1;
+        int index = 0;
 
         // Agregar filtros dinámicos
         try {
@@ -202,7 +202,7 @@ public class ModeloDaoImpl implements IDaoModelo {
         sqlQuery.append("WHERE 1=1"); // Condición base para facilitar adiciones dinámicas
 
         HashMap<Integer, Object> param = new HashMap<>();
-        int index = 1;
+        int index = 0;
 
         try {
             // Filtro por código del modelo

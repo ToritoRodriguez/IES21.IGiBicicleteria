@@ -61,6 +61,6 @@ public class Marca {
     
     @Override
     public String toString() {
-        return marca;  // Esto es lo que el JComboBox debería mostrar
+        return this.marca;  // Esto asegura que el nombre de la marca se muestre en el JComboBox
     }
 }

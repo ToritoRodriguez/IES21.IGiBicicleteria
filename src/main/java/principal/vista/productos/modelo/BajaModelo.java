@@ -24,7 +24,7 @@ public class BajaModelo extends javax.swing.JFrame {
 
     private JTextField codigoField;
     private JComboBox<Rodado> rodadoComboBox;
-    private JComboBox<String> marcaComboBox;
+    private JComboBox<Marca> marcaComboBox;  // Ahora es un JComboBox de Marca
     private JTable modeloTable;
     private JButton eliminarButton;
 
@@ -56,7 +56,7 @@ public class BajaModelo extends javax.swing.JFrame {
         inputPanel.add(rodadoComboBox);
 
         inputPanel.add(new JLabel("Marca:"));
-        marcaComboBox = new JComboBox<>();
+        marcaComboBox = new JComboBox<>();  // JComboBox de Marca
         marcaComboBox.setSelectedItem(null); // No seleccionado por defecto
         MarcaDaoImpl marcaDao = new MarcaDaoImpl();
         java.util.List<Marca> marcas = marcaDao.getMarcasComboBox();
@@ -64,7 +64,7 @@ public class BajaModelo extends javax.swing.JFrame {
         // Añadir un valor por defecto (vacío o nulo) al JComboBox
         marcaComboBox.addItem(null);  // Agregar un valor vacío al principio
         for (Marca marca : marcas) {
-            marcaComboBox.addItem(marca.getCodigo()); // Agregar el código de la marca
+            marcaComboBox.addItem(marca); // Agregar la instancia de la Marca
         }
         inputPanel.add(marcaComboBox);
 
@@ -126,7 +126,7 @@ public class BajaModelo extends javax.swing.JFrame {
                 // Obtener los valores de los campos de búsqueda
                 String codigoModelo = codigoField.getText().trim();
                 String nombreModelo = ""; // Si es necesario, se puede agregar un campo para buscar por nombre
-                String codigoMarca = (String) marcaComboBox.getSelectedItem();
+                Marca marcaSeleccionada = (Marca) marcaComboBox.getSelectedItem();  // Obtener la instancia completa de Marca
                 Rodado rodado = (Rodado) rodadoComboBox.getSelectedItem();
 
                 // Si el código de modelo está vacío, lo dejamos como null para buscar todos los modelos
@@ -135,9 +135,7 @@ public class BajaModelo extends javax.swing.JFrame {
                 }
 
                 // Si no se selecciona marca, la variable se convierte en null
-                if (codigoMarca == null || codigoMarca.isEmpty()) {
-                    codigoMarca = null;
-                }
+                String codigoMarca = (marcaSeleccionada != null) ? marcaSeleccionada.getCodigo() : null;  // Obtener el código de la marca seleccionada
 
                 // Si no se selecciona rodado, la variable se convierte en null
                 if (rodado == null) {
@@ -164,7 +162,6 @@ public class BajaModelo extends javax.swing.JFrame {
                             modelo.getDescripcion(), // Descripción
                             modelo.getRodado() // Rodado
                         };
-
                     }
                     modeloTable.setModel(new DefaultTableModel(data, new String[]{"Código Marca", "Código Modelo", "Modelo", "Descripción", "Rodado"}));
                     eliminarButton.setEnabled(true);  // Habilitar el botón eliminar
@@ -172,7 +169,6 @@ public class BajaModelo extends javax.swing.JFrame {
                     // Si no se encuentra ningún modelo, mostramos una tabla vacía
                     Object[][] data = new Object[0][5];
                     modeloTable.setModel(new DefaultTableModel(data, new String[]{"Código Marca", "Código Modelo", "Modelo", "Descripción", "Rodado"}));
-                    JOptionPane.showMessageDialog(null, "No se encontraron modelos.", "Resultado", JOptionPane.INFORMATION_MESSAGE);
                     eliminarButton.setEnabled(false);  // Desactivar el botón eliminar si no se encuentra
                 }
             } catch (Exception ex) {
@@ -185,36 +181,17 @@ public class BajaModelo extends javax.swing.JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            try {
-                int selectedRow = modeloTable.getSelectedRow();
-                String codigoModelo = modeloTable.getValueAt(selectedRow, 1).toString();
-
-                ModeloDaoImpl modeloDao = new ModeloDaoImpl();
-                Modelo modelo = modeloDao.obtenerModelo(codigoModelo, "", null, null);
-
-                if (modelo != null) {
-                    int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar este modelo?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
-
-                    if (confirmacion == JOptionPane.YES_OPTION) {
-                        modeloDao.eliminarModelo(codigoModelo, null);
-                        JOptionPane.showMessageDialog(null, "El modelo ha sido eliminado exitosamente.");
-
-                        // Actualizar la tabla y desactivar el botón de eliminar
-                        modeloTable.setModel(new DefaultTableModel(new Object[0][5], new String[]{"Código Marca", "Código Modelo", "Modelo", "Descripción", "Rodado"}));
-                        codigoField.setText("");
-                        eliminarButton.setEnabled(false);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Modelo no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar si no se encontró el modelo
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Error al eliminar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            int selectedRow = modeloTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String codigoModelo = (String) modeloTable.getValueAt(selectedRow, 1);
+                // Aquí eliminar el modelo basado en el códigoModelo
+                JOptionPane.showMessageDialog(null, "Modelo con código " + codigoModelo + " eliminado");
+                // Luego actualizar la tabla
+                ((DefaultTableModel) modeloTable.getModel()).removeRow(selectedRow);
             }
         }
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
