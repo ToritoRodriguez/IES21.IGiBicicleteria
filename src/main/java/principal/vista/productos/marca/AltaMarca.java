@@ -5,8 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import modelo.producto.marca.Marca;
-import negocio.abm.producto.ABMMarca;
 import principal.vista.productos.HomeMenuProductos;
+import repositorio.dao.marca.MarcaDaoImpl;
 
 /**
  *
@@ -16,7 +16,7 @@ import principal.vista.productos.HomeMenuProductos;
 public class AltaMarca extends javax.swing.JFrame {
 
     private JTextField nombreMarcaField;
-    
+
     public AltaMarca() {
         setTitle("Alta Marca");
         setSize(400, 200);
@@ -60,11 +60,11 @@ public class AltaMarca extends javax.swing.JFrame {
                 // Crear un objeto Marca
                 Marca marca = new Marca(nombreMarca);
 
-                // Crear una instancia de ABMMarca (asumiendo que es similar a ABMCliente)
-                ABMMarca abmMarca = new ABMMarca();
+                // Crear una instancia de MarcaDaoImpl
+                MarcaDaoImpl marcaDao = new MarcaDaoImpl();
 
-                // Llamar al método de alta de la marca
-                abmMarca.altaMarca(marca);
+                // Llamar al método de insertar nueva marca
+                marcaDao.insertarNuevaMarca(marca);
 
                 // Mostrar un mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Marca dada de alta exitosamente");

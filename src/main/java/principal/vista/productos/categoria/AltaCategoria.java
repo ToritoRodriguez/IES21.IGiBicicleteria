@@ -5,9 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import principal.vista.productos.HomeMenuProductos;
-import negocio.abm.producto.ABMCategoria;
 import modelo.producto.Categoria;
 import modelo.producto.TipoCategoria;
+import repositorio.dao.categoria.CategoriaDaoImpl;
 
 /**
  *
@@ -18,7 +18,7 @@ public class AltaCategoria extends javax.swing.JFrame {
 
     private JTextField nombreCategoriaField;
     private JComboBox<String> tipoCategoriaComboBox;
-    
+
     public AltaCategoria() {
         setTitle("Alta Categoría");
         setSize(400, 250);
@@ -56,7 +56,7 @@ public class AltaCategoria extends javax.swing.JFrame {
             try {
                 // Obtener los datos del formulario
                 String nombreCategoria = nombreCategoriaField.getText();
-                String tipoCategoria = (String) tipoCategoriaComboBox.getSelectedItem();  
+                String tipoCategoria = (String) tipoCategoriaComboBox.getSelectedItem();
 
                 if (nombreCategoria.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "El nombre de la categoría no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -76,9 +76,9 @@ public class AltaCategoria extends javax.swing.JFrame {
                 // Crear un objeto Categoria
                 Categoria categoria = new Categoria(nombreCategoria, tipo);
 
-                // Crear una instancia de ABMCategoria y dar de alta la categoría
-                ABMCategoria abmCategoria = new ABMCategoria();
-                abmCategoria.altaCategoria(categoria, tipo.ordinal());  // Aquí se pasa el tipo como un número entero
+                // Utilizar CategoriaDaoImpl para insertar la nueva categoría
+                CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
+                categoriaDao.insertarNuevaCategoria(categoria); // Aquí se usa el método insertarNuevaCategoria
 
                 // Mostrar un mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Categoría dada de alta exitosamente.");

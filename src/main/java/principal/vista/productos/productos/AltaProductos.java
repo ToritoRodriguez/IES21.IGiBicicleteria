@@ -5,13 +5,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import modelo.producto.Producto;
-import negocio.abm.producto.ABMProducto;
 import principal.vista.productos.HomeMenuProductos;
 import modelo.producto.Categoria;
 import modelo.producto.marca.Modelo;
 import modelo.proveedor.Proveedor;
 import repositorio.dao.categoria.CategoriaDaoImpl;
 import repositorio.dao.modelo.ModeloDaoImpl;
+import repositorio.dao.producto.ProductoDaoImpl;
 import repositorio.dao.proveedor.ProveedorDaoImpl;
 
 /**
@@ -133,9 +133,11 @@ public class AltaProductos extends javax.swing.JFrame {
                 // Crear el objeto Producto
                 Producto producto = new Producto(0, nombreProducto, descripcionProducto, categoria, modelo, proveedor, precio, pathImagen, cantidad);
 
-                // Alta producto
-                ABMProducto abmProducto = new ABMProducto();
-                abmProducto.altaProducto(producto);
+                // Crear una instancia de ProductoDaoImpl
+                ProductoDaoImpl productoDao = new ProductoDaoImpl();
+
+                // Llamar al método de insertar nuevo producto
+                productoDao.insertarNuevoProducto(producto);
 
                 // Mostrar mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Producto registrado exitosamente.");
@@ -146,7 +148,7 @@ public class AltaProductos extends javax.swing.JFrame {
             }
         }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

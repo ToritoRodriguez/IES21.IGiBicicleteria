@@ -8,9 +8,8 @@ import repositorio.dao.marca.MarcaDaoImpl;
 import modelo.producto.marca.Modelo;
 import modelo.producto.marca.Rodado;
 import modelo.producto.marca.Marca;
-import negocio.abm.producto.ABMModelo;
-import negocio.abm.producto.exception.ModeloException;
 import principal.vista.productos.HomeMenuProductos;
+import repositorio.dao.modelo.ModeloDaoImpl;
 
 /**
  *
@@ -23,7 +22,7 @@ public class AltaModelo extends javax.swing.JFrame {
     private JTextField descripcionField;
     private JTextField marcaField;
     private JComboBox<String> rodadoComboBox;
-    
+
     public AltaModelo() {
         setTitle("Alta Modelo");
         setSize(400, 350);
@@ -96,22 +95,22 @@ public class AltaModelo extends javax.swing.JFrame {
                 // Crear un objeto Modelo
                 Modelo modelo = new Modelo(0, nombreModelo, marca, descripcion, rodado);
 
-                // Crear instancia de ABMModelo y registrar el modelo
-                ABMModelo abmModelo = new ABMModelo();
-                abmModelo.altaModelo(modelo);
+                // Utilizar ModeloDaoImpl para insertar el nuevo modelo
+                ModeloDaoImpl modeloDao = new ModeloDaoImpl();
+                modeloDao.insertarNuevoModelo(modelo);
 
                 // Mostrar mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Modelo registrado exitosamente.");
-            } catch (ModeloException ex) {
-                // Manejo de excepciones
-                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             } catch (IllegalArgumentException ex) {
                 // Manejo de excepción en caso de un rodado inválido
                 JOptionPane.showMessageDialog(null, "Rodado no válido. Intente nuevamente.", "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                // Manejo de excepciones
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
