@@ -20,6 +20,12 @@ public class Marca {
         this.modelos = new ArrayList<>();
     }
 
+    // Este constructor se usa para el ComboBox
+    public Marca(String codigo, String nombre) {
+        this.codigo = codigo;
+        this.marca = nombre;
+    }
+    
     // Get and Set
     public int getId() {
         return id;
@@ -51,5 +57,10 @@ public class Marca {
 
     public void setModelos(List<Modelo> modelos) {
         this.modelos = modelos;
+    }
+    
+    @Override
+    public String toString() {
+        return marca;  // Esto es lo que el JComboBox debería mostrar
     }
 }

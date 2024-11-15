@@ -13,6 +13,10 @@ import principal.vista.productos.categoria.AltaCategoria;
 import principal.vista.productos.categoria.BajaCategoria;
 import principal.vista.productos.categoria.EditarCategoria;
 import principal.vista.productos.categoria.ListarCategoria;
+import principal.vista.productos.modelo.AltaModelo;
+import principal.vista.productos.modelo.BajaModelo;
+import principal.vista.productos.modelo.EditarModelo;
+import principal.vista.productos.modelo.ListarModelo;
 
 
 /**
@@ -163,6 +167,39 @@ public class HomeMenuProductos extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new ListarCategoria().setVisible(true);
+                dispose();
+            }
+        });
+        
+        // Modelos
+        altaModelos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AltaModelo().setVisible(true);
+                dispose();
+            }
+        });
+
+        bajaModelos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new BajaModelo().setVisible(true);
+                dispose();
+            }
+        });
+
+        modificacionModelos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new EditarModelo().setVisible(true);
+                dispose();
+            }
+        });
+
+        listadoModelos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ListarModelo().setVisible(true);
                 dispose();
             }
         });

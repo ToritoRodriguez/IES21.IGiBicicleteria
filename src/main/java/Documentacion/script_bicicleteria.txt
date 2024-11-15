@@ -61,13 +61,12 @@ CREATE TABLE marcas (
 -- Creamos la tabla modelos
 CREATE TABLE modelos (
     id INT AUTO_INCREMENT,
-    id_marca INT NOT NULL,
+    codigo_marca VARCHAR(25) NOT NULL,
     codigo VARCHAR(25) NOT NULL,
     modelo VARCHAR(15) NOT NULL,
     descripcion TEXT NOT NULL,
     rodado VARCHAR(15),
-    PRIMARY KEY (id),
-    FOREIGN KEY (id_marca) REFERENCES marcas(id)
+    PRIMARY KEY (id)
 );
 
 -- Creamos la tabla productos

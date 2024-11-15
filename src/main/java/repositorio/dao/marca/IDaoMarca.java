@@ -23,4 +23,6 @@ public interface IDaoMarca{
     
     // Obtener
     public Marca obtenerMarca(String codigoMarca, String nombreMarca);
+    
+    public List<Marca> getMarcasComboBox();
 }

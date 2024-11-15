@@ -137,7 +137,7 @@ public class Producto {
     public String getCodigoProveedor() {
         return proveedor != null ? proveedor.getCodigo() : null;
     }
-    
+
     @Override
     public String toString() {
         return "Producto ID: " + this.id + ", Nombre: " + this.nombre + ", Descripción: " + this.descripcion + ", Categoría: " + this.categoria.getCategoria() + ", Modelo: " + this.modelo.getModelo() + ", Proveedor: " + this.proveedor.getCodigo() + ", Precio: " + this.precio + ", Cantidad: " + this.cantidad + ", Imagen: " + this.pathImagen;

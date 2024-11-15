@@ -197,6 +197,30 @@ public class MarcaDaoImpl implements IDaoMarca {
         return marca;
     }
     
+    @Override
+    public List<Marca> getMarcasComboBox() {
+        List<Marca> marcas = new ArrayList<>();
+
+        String sqlQuery = "SELECT codigo, marca FROM marcas";
+
+        try {
+            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlQuery);
+
+            while (rs.next()) {
+                String codigo = rs.getString("codigo");
+                String nombreMarca = rs.getString("marca");
+
+                Marca marca = new Marca(nombreMarca);
+                marca.setCodigo(codigo);
+                marcas.add(marca);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener la lista de marcas: " + e.getMessage());
+        }
+
+        return marcas;
+    }
+    
     public String getProximoCodigoMarca() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM marcas"; 
         conexionDb = new ConexionDb();

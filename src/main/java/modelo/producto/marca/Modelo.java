@@ -8,11 +8,29 @@ package modelo.producto.marca;
 public class Modelo {
 
     private int id; 
+    private String codigo;
     private String modelo;
     private Marca marca;
     private String descripcion;
     private Rodado rodado;
 
+    public Modelo(int id, String codigo, String modelo, Marca marca, String descripcion, Rodado rodado) {
+        this.id = id;
+        this.codigo = codigo;
+        this.modelo = modelo;
+        this.marca = marca;
+        this.descripcion = descripcion;
+        this.rodado = rodado;
+    }
+    
+    public Modelo(String codigo, String modelo, Marca marca, String descripcion, Rodado rodado) {
+        this.codigo = codigo;
+        this.modelo = modelo;
+        this.marca = marca;
+        this.descripcion = descripcion;
+        this.rodado = rodado;
+    }
+    
     public Modelo(int id, String modelo, Marca marca, String descripcion, Rodado rodado) {
         this.id = id; 
         this.modelo = modelo;
@@ -68,6 +86,14 @@ public class Modelo {
 
     public int getIdModelo() {
         return this.id;
+    }
+    
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
     
     @Override
