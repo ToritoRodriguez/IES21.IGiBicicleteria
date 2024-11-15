@@ -5,9 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import repositorio.dao.categoria.CategoriaDaoImpl;
-import principal.vista.gente.HomeMenuGente;
 import modelo.producto.Categoria;
-import modelo.producto.TipoCategoria;
 import principal.vista.productos.HomeMenuProductos;
 
 /**
@@ -91,21 +89,14 @@ public class EditarCategoria extends javax.swing.JFrame {
                     return;
                 }
 
-                // Verificamos si el código es un número
-                if (!input.matches("\\d+")) {
-                    JOptionPane.showMessageDialog(null, "El código debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                int codigo = Integer.parseInt(input);  // Convertimos el código a int
-
                 CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-                Categoria categoria = categoriaDao.buscarCategoriaPorId(codigo);  // Buscamos la categoría por su ID (código)
+                // Usamos obtenerCategoria con código de tipo String
+                Categoria categoria = categoriaDao.obtenerCategoria(input, null, null);  // No filtramos por nombre ni tipo
 
                 if (categoria != null) {
                     // Actualizamos la tabla con la información de la categoría (Código, Nombre y Tipo)
                     Object[][] data = {
-                        {categoria.getId(), categoria.getCategoria(), categoria.getTipo().toString()} // Aquí agregamos el Tipo
+                        {categoria.getCodigo(), categoria.getNombre(), categoria.getTipo().toString()} // Aquí agregamos el Tipo
                     };
                     categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
                             data,
@@ -133,7 +124,10 @@ public class EditarCategoria extends javax.swing.JFrame {
                     return;
                 }
 
-                int codigo = (int) categoriaTable.getValueAt(selectedRow, 0);  // Obtener el código de la categoría
+                // Obtener el código de la categoría como String
+                String codigo = (String) categoriaTable.getValueAt(selectedRow, 0);  // Obtener el código de la categoría
+               
+                categoriaTable.getCellEditor().stopCellEditing();
                 String nuevoNombre = (String) categoriaTable.getValueAt(selectedRow, 1);  // Obtener el nuevo nombre de la categoría
 
                 if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
@@ -142,12 +136,23 @@ public class EditarCategoria extends javax.swing.JFrame {
                 }
 
                 CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-                Categoria categoriaExistente = categoriaDao.buscarCategoriaPorId(codigo);  // Buscar la categoría en la base de datos
+                // Buscar la categoría por código (que ahora es de tipo String)
+                Categoria categoriaExistente = categoriaDao.obtenerCategoria(codigo, null, null);  // Usamos solo el código
 
                 if (categoriaExistente != null) {
                     categoriaExistente.setCategoria(nuevoNombre);  // Actualizar el nombre de la categoría
                     categoriaDao.modificarCategoria(codigo, categoriaExistente);  // Guardar los cambios en la base de datos
                     JOptionPane.showMessageDialog(null, "Categoría modificada con éxito.");
+
+                    // Ahora, después de modificar, recargamos la información
+                    Categoria categoriaModificada = categoriaDao.obtenerCategoria(codigo, null, null); // Obtener los datos actualizados
+                    Object[][] data = {
+                        {categoriaModificada.getCodigo(), categoriaModificada.getCategoria(), categoriaModificada.getTipo().toString()}
+                    };
+                    categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
+                            data,
+                            new String[]{"Código", "Nombre", "Tipo"} // Actualizamos las columnas con la nueva información
+                    ));
                 } else {
                     JOptionPane.showMessageDialog(null, "Categoría no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -156,7 +161,6 @@ public class EditarCategoria extends javax.swing.JFrame {
             }
         }
     }
-
 
     /**
      * This method is called from within the constructor to initialize the form.

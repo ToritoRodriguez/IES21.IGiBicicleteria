@@ -199,40 +199,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar
-    public Vendedor obtenerVendedor(String codigo) {
-        String sqlVendedor = "SELECT * FROM vendedores v "
-                + "INNER JOIN personas p ON p.id = v.id_persona "
-                + "WHERE v.codigo = ?";
-
-        Vendedor vendedor = null;
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, codigo);
-
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedor, param);
-
-            if (rs != null && rs.next()) {
-                vendedor = new Vendedor(
-                        rs.getString("cuit"),
-                        rs.getString("sucursal"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener el vendedor: " + e.getMessage());
-        }
-
-        return vendedor;
-    }
-
-    @Override
     // Listado de Vendedores
     public List<Vendedor> getVendedores(String codigo, String nombre, String apellido, String sucursal) {
         List<Vendedor> vendedores = new ArrayList<>();
@@ -297,6 +263,39 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
+    // Sirve para la Baja y Modificacion - Lo usamos para buscar
+    public Vendedor obtenerVendedor(String codigo) {
+        String sqlVendedor = "SELECT * FROM vendedores v "
+                + "INNER JOIN personas p ON p.id = v.id_persona "
+                + "WHERE v.codigo = ?";
+
+        Vendedor vendedor = null;
+        conexionDb = new ConexionDb();
+
+        try {
+            HashMap<Integer, Object> param = new HashMap<>();
+            param.put(0, codigo);
+
+            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedor, param);
+
+            if (rs != null && rs.next()) {
+                vendedor = new Vendedor(
+                        rs.getString("cuit"),
+                        rs.getString("sucursal"),
+                        rs.getString("nombre"),
+                        rs.getString("apellido"),
+                        rs.getString("dni"),
+                        rs.getString("telefono"),
+                        rs.getString("email")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener el vendedor: " + e.getMessage());
+        }
+
+        return vendedor;
+    }
+    
     // Sirve para el manejo de codigos
     public String getProximoCodigoVendedor() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM vendedores";
@@ -312,38 +311,5 @@ public class VendedorDaoImpl implements IDaoVendedor {
         }
 
         return "V-1"; 
-    }
-    
-    // Sirve para Pedidos
-    public Vendedor obtenerVendedorPorId(int idVendedor) {
-        Vendedor vendedor = null;
-        String sql = "SELECT v.id, v.cuit, v.sucursal, p.nombre, p.apellido, p.dni, p.telefono, p.email "
-                + "FROM vendedores v "
-                + "INNER JOIN personas p ON v.id_persona = p.id "
-                + "WHERE v.id = ?"; 
-
-        conexionDb = new ConexionDb();
-        try {
-            PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql);
-            stmt.setInt(1, idVendedor);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                vendedor = new Vendedor(
-                        rs.getString("cuit"),
-                        rs.getString("sucursal"),
-                        rs.getString("nombre"), 
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                vendedor.setId(rs.getInt("id"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener vendedor: " + e.getMessage());
-        }
-
-        return vendedor;
     }
 }

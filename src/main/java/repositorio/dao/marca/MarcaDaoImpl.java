@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import repositorio.dao.ConexionDb;
 import modelo.producto.marca.Marca;
-import negocio.abm.producto.exception.MarcaException;
 
 /**
  *
@@ -24,7 +23,8 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
     
     @Override
-    public void insertarNuevaMarca(Marca marca) throws MarcaException {
+    // Metodo para insertar
+    public void insertarNuevaMarca(Marca marca) {
         String nombreMarca = marca.getMarca();
         String codigoMarca = getProximoCodigoMarca();  // Obtener el próximo código para la marca
 
@@ -107,7 +107,8 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
-    public void modificarMarca(String codigoMarca, Marca marcaModificada) throws MarcaException {
+    // Metodo para Modificar
+    public void modificarMarca(String codigoMarca, Marca marcaModificada) {
         String sqlUpdateMarca = "UPDATE marcas SET marca = ? WHERE codigo = ?";
 
         try (PreparedStatement stmtUpdate = conexionDb.obtenerConexion().prepareStatement(sqlUpdateMarca)) {
@@ -126,6 +127,47 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
+    // Listado de Marcas
+    public List<Marca> getMarcas(String codigoMarca, String nombreMarca) {
+        List<Marca> marcas = new ArrayList<>();
+        StringBuilder sqlQuery = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
+
+        HashMap<Integer, Object> param = new HashMap<>();
+        int index = 0;
+
+        // Filtrar por código de la marca si se proporciona
+        if (codigoMarca != null && !codigoMarca.isEmpty()) {
+            sqlQuery.append(" AND codigo = ?");
+            param.put(index++, codigoMarca);
+        }
+
+        // Filtrar por nombre de la marca si se proporciona
+        if (nombreMarca != null && !nombreMarca.isEmpty()) {
+            sqlQuery.append(" AND marca LIKE ?");
+            param.put(index++, "%" + nombreMarca + "%");
+        }
+
+        try {
+            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlQuery.toString(), param);
+
+            while (rs.next()) {
+                String codigo = rs.getString("codigo");
+                String nombre = rs.getString("marca");
+                Marca marca = new Marca(nombre);
+                marca.setCodigo(codigo);
+                marca.setModelos(new ArrayList<>());
+                marcas.add(marca);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al obtener la lista de marcas: " + e.getMessage());
+        }
+
+        return marcas;
+    }
+    
+    @Override
+    // Sirve para la Baja y Modificacion - Lo usamos para buscar
     public Marca obtenerMarca(String codigoMarca, String nombreMarca) {
         Marca marca = null;
         StringBuilder sql = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
@@ -172,46 +214,8 @@ public class MarcaDaoImpl implements IDaoMarca {
 
         return marca;
     }
-
-    @Override
-    public List<Marca> getMarcas(String codigoMarca, String nombreMarca) {
-        List<Marca> marcas = new ArrayList<>();
-        StringBuilder sqlQuery = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
-
-        HashMap<Integer, Object> param = new HashMap<>();
-        int index = 0;
-
-        // Filtrar por código de la marca si se proporciona
-        if (codigoMarca != null && !codigoMarca.isEmpty()) {
-            sqlQuery.append(" AND codigo = ?");
-            param.put(index++, codigoMarca);
-        }
-
-        // Filtrar por nombre de la marca si se proporciona
-        if (nombreMarca != null && !nombreMarca.isEmpty()) {
-            sqlQuery.append(" AND marca LIKE ?");
-            param.put(index++, "%" + nombreMarca + "%");
-        }
-
-        try {
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlQuery.toString(), param);
-
-            while (rs.next()) {
-                String codigo = rs.getString("codigo");
-                String nombre = rs.getString("marca");
-                Marca marca = new Marca(nombre);
-                marca.setCodigo(codigo);
-                marca.setModelos(new ArrayList<>());
-                marcas.add(marca);
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de marcas: " + e.getMessage());
-        }
-
-        return marcas;
-    }
     
+    // Sirve para el manejo de codigos
     public String getProximoCodigoMarca() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM marcas";  // Consulta para obtener el máximo id
         conexionDb = new ConexionDb();
@@ -226,23 +230,5 @@ public class MarcaDaoImpl implements IDaoMarca {
         }
 
         return "M-1";  // Si no se encuentra ningún código, asigna "M-1" como código inicial
-    }
-    
-    // Borrar despues
-    public Marca buscarMarcaPorNombre(String nombreMarca) {
-        String sql = "SELECT * FROM marcas WHERE marca = ?";
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setString(1, nombreMarca);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                int id = rs.getInt("id");
-                String nombre = rs.getString("marca");
-                return new Marca(id, nombre);  // Devuelve la marca si se encuentra
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();  // Puedes manejar la excepción aquí
-        }
-        return null;  // Retorna null si no se encuentra la marca o hubo un error
     }
 }

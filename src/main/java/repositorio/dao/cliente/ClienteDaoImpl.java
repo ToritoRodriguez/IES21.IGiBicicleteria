@@ -177,40 +177,6 @@ public class ClienteDaoImpl implements IDaoCliente{
             System.out.println("Error al modificar el cliente: " + e.getMessage());
         }
     }
-    
-    @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar por codigo
-    public Cliente obtenerCliente(String codigo) {
-        String sqlClient = "SELECT * FROM clientes c "
-                + "INNER JOIN personas p ON p.id = c.id_persona "
-                + "WHERE c.codigo = ?";  
-
-        Cliente cliente = null;
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, codigo);  
-
-            System.out.println("Parámetro 'codigo' añadido correctamente al HashMap: " + param.get(0));
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlClient, param);
-
-            if (rs != null && rs.next()) {
-                cliente = new Cliente(
-                        rs.getString("cuil"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener el cliente: " + e.getMessage());
-        }
-
-        return cliente;
-    }
 
     @Override
     // Listado de Clientes
@@ -276,6 +242,39 @@ public class ClienteDaoImpl implements IDaoCliente{
     }
 
     @Override
+    // Sirve para la Baja y Modificacion - Lo usamos para buscar por codigo
+    public Cliente obtenerCliente(String codigo) {
+        String sqlClient = "SELECT * FROM clientes c "
+                + "INNER JOIN personas p ON p.id = c.id_persona "
+                + "WHERE c.codigo = ?";
+
+        Cliente cliente = null;
+        conexionDb = new ConexionDb();
+
+        try {
+            HashMap<Integer, Object> param = new HashMap<>();
+            param.put(0, codigo);
+
+            System.out.println("Parámetro 'codigo' añadido correctamente al HashMap: " + param.get(0));
+            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlClient, param);
+
+            if (rs != null && rs.next()) {
+                cliente = new Cliente(
+                        rs.getString("cuil"),
+                        rs.getString("nombre"),
+                        rs.getString("apellido"),
+                        rs.getString("dni"),
+                        rs.getString("telefono"),
+                        rs.getString("email")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener el cliente: " + e.getMessage());
+        }
+
+        return cliente;
+    }
+    
     // Sirve para el manejo de codigos
     public String getProximoCodigoCliente(){
         String sqlNextCode = "SELECT MAX(id) AS total FROM clientes";
@@ -292,38 +291,5 @@ public class ClienteDaoImpl implements IDaoCliente{
         }
 
         return "C-1"; 
-    }
-    
-    // Sirve para Pedidos
-    public Cliente obtenerClientePorId(int idCliente) {
-        Cliente cliente = null;
-        String sql = "SELECT c.id, c.codigo, c.cuil, p.nombre, p.apellido, p.dni, p.telefono, p.email "
-                + "FROM clientes c "
-                + "INNER JOIN personas p ON c.id_persona = p.id "
-                + "WHERE c.id = ?"; 
-
-        conexionDb = new ConexionDb();
-        try {
-            PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql);
-            stmt.setInt(1, idCliente);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                cliente = new Cliente(
-                        rs.getString("codigo"),
-                        rs.getString("cuil"),
-                        rs.getString("nombre"), 
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                cliente.setId(rs.getInt("id"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener cliente: " + e.getMessage());
-        }
-
-        return cliente;
     }
 }

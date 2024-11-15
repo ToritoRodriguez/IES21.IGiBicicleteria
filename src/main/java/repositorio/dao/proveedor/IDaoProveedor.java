@@ -9,17 +9,21 @@ import modelo.proveedor.Proveedor;
  */
 
 public interface IDaoProveedor{
+    // Alta
     public void insertarNuevoProveedor(Proveedor proveedor);
 
+    // Baja
+    public void eliminarProveedor(String codigo, String nombre, String apellido, String nombreFantasia);
+    
+    // Modificar
     public void modificarProveedor(String codigo, Proveedor proveedor);
 
-    public void eliminarProveedor(String codigo, String nombre, String apellido, String nombreFantasia);
-
-    public Proveedor obtenerProveedor(String codigo);
-
+    // Listar
     public List<Proveedor> getProveedores(String codigo, String nombre, String apellido, String nombreFantasia);
     
+    // Obtener
+    public Proveedor obtenerProveedor(String codigo);
+    
+    // ComboBox
     public List<Proveedor> getProveedoresComboBox();
-
-    public String getProximoCodigoProveedor();
 }

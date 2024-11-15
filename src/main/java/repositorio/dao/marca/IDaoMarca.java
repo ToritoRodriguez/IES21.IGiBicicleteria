@@ -2,7 +2,6 @@ package repositorio.dao.marca;
 
 import java.util.List;
 import modelo.producto.marca.Marca;
-import negocio.abm.producto.exception.MarcaException;
 
 /**
  *
@@ -10,13 +9,18 @@ import negocio.abm.producto.exception.MarcaException;
  */
 
 public interface IDaoMarca{
-    public void insertarNuevaMarca(Marca marca) throws MarcaException;
+    //Alta
+    public void insertarNuevaMarca(Marca marca);
     
+    // Baja
     public void eliminarMarca(String codigo, String nombre);
 
-    public void modificarMarca(String codigoMarca, Marca marcaModificada) throws MarcaException;
+    // Modificar
+    public void modificarMarca(String codigoMarca, Marca marcaModificada);
 
-    public Marca obtenerMarca(String codigoMarca, String nombreMarca);
-    
+    // Listar
     public List<Marca> getMarcas(String codigoMarca, String nombreMarca);
+    
+    // Obtener
+    public Marca obtenerMarca(String codigoMarca, String nombreMarca);
 }

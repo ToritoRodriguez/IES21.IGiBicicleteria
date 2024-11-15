@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import modelo.producto.Categoria;
 import repositorio.dao.categoria.CategoriaDaoImpl;
-import principal.vista.gente.HomeMenuGente;
 import principal.vista.productos.HomeMenuProductos;
 import modelo.producto.TipoCategoria;
 import java.util.stream.Collectors;
@@ -86,40 +85,22 @@ public class ListarCategoria extends javax.swing.JFrame {
             String nombre = nombreCategoriaField.getText().trim();
             TipoCategoria tipoCategoria = (TipoCategoria) tipoCategoriaComboBox.getSelectedItem();
 
-            if (!nombre.isEmpty() && tipoCategoria != null) {
-                actualizarTablaCategorias(nombre, tipoCategoria);  // Buscar por nombre y tipo
-            } else if (!nombre.isEmpty()) {
-                actualizarTablaCategoriasPorNombre(nombre);  // Buscar solo por nombre
-            } else if (tipoCategoria != null) {
-                actualizarTablaCategoriasPorTipo(tipoCategoria);  // Buscar solo por tipo
-            } else {
-                actualizarTablaCategorias(null, null);  // Si todos los campos están vacíos, traer todas las categorías
-            }
+            // Filtrar según el nombre y tipo de categoría
+            actualizarTablaCategorias(nombre, tipoCategoria);
         }
     }
 
     private void actualizarTablaCategorias(String nombreCategoria, TipoCategoria tipoCategoria) {
         CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-        List<Categoria> categorias = categoriaDao.getCategorias(0, null); // Inicialmente obtiene todas las categorías.
-
-        // Filtrar las categorías por nombre y tipo si se proporcionan
-        if (nombreCategoria != null && !nombreCategoria.isEmpty()) {
-            categorias = categorias.stream()
-                    .filter(categoria -> categoria.getCategoria().equalsIgnoreCase(nombreCategoria))
-                    .collect(Collectors.toList());
-        }
-        if (tipoCategoria != null) {
-            categorias = categorias.stream()
-                    .filter(categoria -> categoria.getTipo() == tipoCategoria)
-                    .collect(Collectors.toList());
-        }
+        // Usamos el método getCategorias con los filtros correspondientes
+        List<Categoria> categorias = categoriaDao.getCategorias(null, nombreCategoria, tipoCategoria);
 
         // Convertir la lista de categorías a una estructura de datos que la JTable pueda usar
         Object[][] data = new Object[categorias.size()][3];
         for (int i = 0; i < categorias.size(); i++) {
             Categoria categoria = categorias.get(i);
-            data[i][0] = categoria.getId();
-            data[i][1] = categoria.getCategoria();
+            data[i][0] = categoria.getCodigo();
+            data[i][1] = categoria.getNombre();
             data[i][2] = categoria.getTipo();
         }
 
@@ -129,43 +110,7 @@ public class ListarCategoria extends javax.swing.JFrame {
                 new String[]{"ID", "Nombre", "Tipo"}
         ));
     }
-
-    private void actualizarTablaCategoriasPorNombre(String nombreCategoria) {
-        CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-        List<Categoria> categorias = categoriaDao.getCategoriaPorNombre(nombreCategoria);
-
-        Object[][] data = new Object[categorias.size()][3];
-        for (int i = 0; i < categorias.size(); i++) {
-            Categoria categoria = categorias.get(i);
-            data[i][0] = categoria.getId();
-            data[i][1] = categoria.getCategoria();
-            data[i][2] = categoria.getTipo();
-        }
-
-        categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"ID", "Nombre", "Tipo"}
-        ));
-    }
-
-    private void actualizarTablaCategoriasPorTipo(TipoCategoria tipoCategoria) {
-        CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-        List<Categoria> categorias = categoriaDao.getCategoriaPorTipo(tipoCategoria);
-
-        Object[][] data = new Object[categorias.size()][3];
-        for (int i = 0; i < categorias.size(); i++) {
-            Categoria categoria = categorias.get(i);
-            data[i][0] = categoria.getId();
-            data[i][1] = categoria.getCategoria();
-            data[i][2] = categoria.getTipo();
-        }
-
-        categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"ID", "Nombre", "Tipo"}
-        ));
-    }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

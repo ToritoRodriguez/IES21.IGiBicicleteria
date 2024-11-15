@@ -9,15 +9,18 @@ import modelo.cliente.Cliente;
  */
 
 public interface IDaoCliente{
+    // Alta
     public void insertarNuevoCliente(Cliente cliente);
     
+    // Baja
     public void eliminarCliente(String codigo, String nombre, String apellido);
     
+    // Modificar
     public void modificarCliente(String codigo, Cliente cliente);
 
-    public Cliente obtenerCliente(String codigo);
-
+    // Listar
     public List<Cliente> getClientes(String codigo, String nombre, String apellido);
     
-    public String getProximoCodigoCliente();
+    //Obtener
+    public Cliente obtenerCliente(String codigo);
 }

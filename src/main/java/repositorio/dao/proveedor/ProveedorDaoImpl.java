@@ -23,36 +23,44 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     public ProveedorDaoImpl() {
         this.conexionDb = new ConexionDb();
     }
-    
-    private static final String SQL_INSERT_PERSONA = "INSERT INTO personas (nombre, apellido, dni, email, telefono) VALUES (?, ?, ?, ?, ?)";
-    private static final String SQL_INSERT_PROVEEDOR = "INSERT INTO proveedores (id_persona, codigo, nombre_fantasia, cuit) VALUES (?, ?, ?, ?)";
 
     @Override
+    // Metodo para insertar
     public void insertarNuevoProveedor(Proveedor proveedor) {
+        // Obtener el próximo código de proveedor
         String codigoProveedor = getProximoCodigoProveedor();
+
+        // Consultas SQL para insertar en las tablas correspondientes
+        String sqlPersona = "INSERT INTO personas (nombre, apellido, dni, email, telefono) VALUES (?, ?, ?, ?, ?)";
+        String sqlProveedor = "INSERT INTO proveedores (id_persona, codigo, nombre_fantasia, cuit) VALUES (?, ?, ?, ?)";
 
         conexionDb = new ConexionDb();
         try {
-            PreparedStatement stmtPersona = conexionDb.obtenerConexion().prepareStatement(SQL_INSERT_PERSONA, Statement.RETURN_GENERATED_KEYS);
+            // Preparar la consulta para insertar la persona
+            PreparedStatement stmtPersona = conexionDb.obtenerConexion().prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS);
             stmtPersona.setString(1, proveedor.getNombre());
             stmtPersona.setString(2, proveedor.getApellido());
             stmtPersona.setString(3, proveedor.getDni());
-            stmtPersona.setString(4, proveedor.getTelefono());
-            stmtPersona.setString(5, proveedor.getEmail());
+            stmtPersona.setString(4, proveedor.getEmail());
+            stmtPersona.setString(5, proveedor.getTelefono());
 
+            // Ejecutar la inserción de la persona
             int affectedRowsPersona = stmtPersona.executeUpdate();
 
             if (affectedRowsPersona > 0) {
+                // Obtener el ID de la persona insertada
                 ResultSet generatedKeysPersona = stmtPersona.getGeneratedKeys();
                 if (generatedKeysPersona.next()) {
                     int personId = generatedKeysPersona.getInt(1);
 
-                    PreparedStatement stmtProveedor = conexionDb.obtenerConexion().prepareStatement(SQL_INSERT_PROVEEDOR);
+                    // Preparar la consulta para insertar el proveedor
+                    PreparedStatement stmtProveedor = conexionDb.obtenerConexion().prepareStatement(sqlProveedor);
                     stmtProveedor.setInt(1, personId);
                     stmtProveedor.setString(2, codigoProveedor);
                     stmtProveedor.setString(3, proveedor.getNombreFantasia());
                     stmtProveedor.setString(4, proveedor.getCuit());
 
+                    // Ejecutar la inserción del proveedor
                     int affectedRowsProveedor = stmtProveedor.executeUpdate();
 
                     if (affectedRowsProveedor > 0) {
@@ -70,6 +78,7 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
+    // Metodo para Eliminar
     public void eliminarProveedor(String codigo, String nombre, String apellido, String nombreFantasia) {
         // Consulta para obtener el id_persona asociado al proveedor, con filtros opcionales
         String sqlProveedorId = "SELECT id_persona FROM proveedores p "
@@ -186,40 +195,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar
-    public Proveedor obtenerProveedor(String codigo) {
-        String sqlProveedor = "SELECT * FROM proveedores pr "
-                + "INNER JOIN personas p ON p.id = pr.id_persona "
-                + "WHERE pr.codigo = ?";
-
-        Proveedor proveedor = null;
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, codigo);
-
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedor, param);
-
-            if (rs.next()) {
-                proveedor = new Proveedor(
-                        rs.getString("cuit"),
-                        rs.getString("nombre_fantasia"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener el proveedor: " + e.getMessage());
-        }
-
-        return proveedor;
-    }
-
-    @Override
     // Listado de Proveedores
     public List<Proveedor> getProveedores(String codigo, String nombre, String apellido, String nombreFantasia) {
         List<Proveedor> proveedores = new ArrayList<>();
@@ -283,32 +258,65 @@ public class ProveedorDaoImpl implements IDaoProveedor{
 
         return proveedores;
     }
+    
+    @Override
+    // Sirve para la Baja y Modificacion - Lo usamos para buscar
+    public Proveedor obtenerProveedor(String codigo) {
+        String sqlProveedor = "SELECT * FROM proveedores pr "
+                + "INNER JOIN personas p ON p.id = pr.id_persona "
+                + "WHERE pr.codigo = ?";
 
+        Proveedor proveedor = null;
+        conexionDb = new ConexionDb();
+
+        try {
+            HashMap<Integer, Object> param = new HashMap<>();
+            param.put(0, codigo);
+
+            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedor, param);
+
+            if (rs.next()) {
+                proveedor = new Proveedor(
+                        rs.getString("cuit"),
+                        rs.getString("nombre_fantasia"),
+                        rs.getString("nombre"),
+                        rs.getString("apellido"),
+                        rs.getString("dni"),
+                        rs.getString("telefono"),
+                        rs.getString("email")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener el proveedor: " + e.getMessage());
+        }
+
+        return proveedor;
+    }
+    
     @Override
     // Listado de Proveedores para Lista desplegable
     public List<Proveedor> getProveedoresComboBox() {
         List<Proveedor> proveedores = new ArrayList<>();
 
-        String sqlQuery = "SELECT pr.codigo, pr.nombre_fantasia FROM proveedores pr"; 
+        String sqlQuery = "SELECT pr.codigo, pr.nombre_fantasia FROM proveedores pr";
 
         try {
-            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlQuery);  
+            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlQuery);
 
             while (rs.next()) {
                 String codigo = rs.getString("codigo");
                 String nombreFantasia = rs.getString("nombre_fantasia");
 
-                Proveedor proveedor = new Proveedor(codigo, nombreFantasia); 
-                proveedores.add(proveedor); 
+                Proveedor proveedor = new Proveedor(codigo, nombreFantasia);
+                proveedores.add(proveedor);
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener la lista de proveedores: " + e.getMessage());
         }
 
-        return proveedores; 
+        return proveedores;
     }
     
-    @Override
     // Sirve para el manejo de codigos
     public String getProximoCodigoProveedor() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM proveedores";
@@ -326,26 +334,5 @@ public class ProveedorDaoImpl implements IDaoProveedor{
         }
 
         return "P-" + Year.now().getValue() + "-1";
-    }
-    
-    public Proveedor buscarProveedorPorId(int idProveedor) throws SQLException {
-        String sql = "SELECT * FROM proveedores WHERE id = ?";
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setInt(1, idProveedor);  // Establecer el ID del proveedor
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                // Obtener los datos del proveedor
-                String codigo = rs.getString("codigo");
-                String nombreFantasia = rs.getString("nombre_fantasia");
-                String cuit = rs.getString("cuit");
-
-                // Crear y retornar el objeto Proveedor con los valores obtenidos
-                Proveedor proveedor = new Proveedor(idProveedor, codigo, nombreFantasia, cuit);
-                return proveedor;
-            } else {
-                return null;  // Si no se encuentra el proveedor
-            }
-        }
     }
 }

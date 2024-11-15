@@ -3,7 +3,6 @@ package repositorio.dao.categoria;
 import java.util.List;
 import modelo.producto.Categoria;
 import modelo.producto.TipoCategoria;
-import negocio.abm.producto.exception.CategoriaException;
 
 /**
  *
@@ -11,25 +10,21 @@ import negocio.abm.producto.exception.CategoriaException;
  */
 
 public interface IDaoCategoria {
-    public void insertarNuevaCategoria(Categoria categoria) throws CategoriaException;
+    // Alta
+    public void insertarNuevaCategoria(Categoria categoria);
 
-    public void eliminarCategoriaPorId(int idCategoria) throws CategoriaException;
-    
-    public void eliminarCategoriaPorNombre(String nombreCategoria) throws CategoriaException;
+    // Baja
+    public void eliminarCategoria(String codigoCategoria, String nombreCategoria, TipoCategoria tipoCategoria);
 
-    public void modificarCategoria(int codigoCategoria, Categoria categoriaModificada) throws CategoriaException;
-
-    public Categoria obtenerCategoria(int idCategoria);
+    // Modificar
+   public void modificarCategoria(String codigoCategoria, Categoria categoriaModificada);
     
-    public boolean categoriaExistePorNombre(String nombreCategoria);
+    // Listar
+    public List<Categoria> getCategorias(String codigoCategoria, String nombreCategoria, TipoCategoria tipoCategoria);
     
-    public Categoria buscarCategoriaPorNombre(String nombreCategoria);
+    // Obtener
+    public Categoria obtenerCategoria(String codigoCategoria, String nombreCategoria, TipoCategoria tipoCategoria);
     
-    public List<Categoria> getCategorias(int idCategoria, String nombreCategoria);
-    
-    public List<Categoria> getCategoriaPorTipo(TipoCategoria tipoCategoria);
-    
-    public List<Categoria> getCategoriaPorNombre(String nombreCategoria);
-    
+    // ComboBox
     public List<Categoria> getCategoriasComboBox();
 }
