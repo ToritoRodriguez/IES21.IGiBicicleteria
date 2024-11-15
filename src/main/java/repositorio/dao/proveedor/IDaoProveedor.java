@@ -13,17 +13,11 @@ public interface IDaoProveedor{
 
     public void modificarProveedor(String codigo, Proveedor proveedor);
 
-    public void eliminarProveedor(String codigo);
+    public void eliminarProveedor(String codigo, String nombre, String apellido, String nombreFantasia);
 
     public Proveedor obtenerProveedor(String codigo);
 
-    public List<Proveedor> getProveedor(String codigo, String nombre, String apellido);
-    
-    public List<Proveedor> getProveedoresPorNombre(String nombre);
-    
-    public List<Proveedor> getProveedoresPorApellido(String apellido);
-    
-    public List<Proveedor> getProveedoresPorNombreFantasia(String nombreFantasia);
+    public List<Proveedor> getProveedores(String codigo, String nombre, String apellido, String nombreFantasia);
     
     public List<Proveedor> getProveedoresComboBox();
 

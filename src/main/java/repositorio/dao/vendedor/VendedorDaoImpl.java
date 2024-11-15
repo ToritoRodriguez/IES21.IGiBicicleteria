@@ -155,7 +155,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
         }
     }
 
-
     @Override
     // Metodo para Modificar
     public void modificarVendedor(String codigo, Vendedor vendedor) {

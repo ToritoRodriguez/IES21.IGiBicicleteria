@@ -93,10 +93,24 @@ public class ListarClientes extends javax.swing.JFrame {
             data[i][6] = cliente.getEmail();
         }
 
-        clientesTable.setModel(new DefaultTableModel(
+        clientesTable.setModel(new ClientesTableModel(
                 data,
                 new String[]{"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
         ));
+    }
+    
+    // Subclase para evitar la edición de celdas
+    private class ClientesTableModel extends DefaultTableModel {
+
+        public ClientesTableModel(Object[][] data, String[] columnNames) {
+            super(data, columnNames);
+        }
+
+        // Anula el método isCellEditable para que todas las celdas sean no editables
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;  // Devuelve falso para hacer las celdas no editables
+        }
     }
     
     /**

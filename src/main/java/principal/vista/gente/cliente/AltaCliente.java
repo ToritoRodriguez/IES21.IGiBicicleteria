@@ -5,8 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import modelo.cliente.Cliente;
-import negocio.abm.cliente.ABMCliente;
 import principal.vista.gente.HomeMenuGente;
+import repositorio.dao.cliente.ClienteDaoImpl;
 
 /**
  *
@@ -75,9 +75,8 @@ public class AltaCliente extends javax.swing.JFrame {
 
                 Cliente cliente = new Cliente(cuil, nombre, apellido, String.valueOf(dni), telefono, email);
 
-                ABMCliente aBMCliente = new ABMCliente();
-                cliente.setCodigo(aBMCliente.asignarCodigoCliente());
-                aBMCliente.altaCliente(cliente);
+                ClienteDaoImpl ClienteDao = new ClienteDaoImpl();
+                ClienteDao.insertarNuevoCliente(cliente);
 
                 JOptionPane.showMessageDialog(null, "Cliente dado de alta exitosamente");
             } catch (Exception ex) {

@@ -94,12 +94,25 @@ public class ListarVendedor extends javax.swing.JFrame {
             data[i][7] = vendedor.getSucursal();
         }
 
-        vendedoresTable.setModel(new DefaultTableModel(
+        vendedoresTable.setModel(new VendedoresTableModel(
                 data,
                 new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"}
         ));
     }
 
+    private class VendedoresTableModel extends DefaultTableModel {
+
+        public VendedoresTableModel(Object[][] data, String[] columnNames) {
+            super(data, columnNames);
+        }
+
+        // Anula el método isCellEditable para que todas las celdas sean no editables
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;  // Devuelve falso para hacer las celdas no editables
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

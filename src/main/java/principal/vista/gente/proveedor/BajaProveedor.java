@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import principal.vista.gente.HomeMenuGente;
 import repositorio.dao.proveedor.ProveedorDaoImpl;
 import modelo.proveedor.Proveedor;
@@ -15,13 +18,13 @@ import modelo.proveedor.Proveedor;
 
 public class BajaProveedor extends javax.swing.JFrame {
 
-    private JTextField codigoField;
+    private JTextField codigoField, nombreFantasiaField, nombreField, apellidoField;
     private JTable proveedorTable;
     private JButton eliminarButton;
-    
+
     public BajaProveedor() {
         setTitle("Baja Proveedor");
-        setSize(500, 300);
+        setSize(500, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
         setLayout(new BorderLayout(10, 10));
@@ -34,38 +37,41 @@ public class BajaProveedor extends javax.swing.JFrame {
         add(titlePanel, BorderLayout.NORTH);
 
         // Panel central para el formulario de búsqueda
-        JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
+        JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));  // Organizar los componentes verticalmente
 
-        JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
-        inputPanel.add(new JLabel("Código del Proveedor:"), BorderLayout.WEST);
-        codigoField = new JTextField();
-        inputPanel.add(codigoField, BorderLayout.CENTER);
+        // Campos de búsqueda
+        addSearchField(searchPanel, "Código del Proveedor:", codigoField = new JTextField(20));
+        addSearchField(searchPanel, "Nombre Fantasía:", nombreFantasiaField = new JTextField(20));
+        addSearchField(searchPanel, "Nombre:", nombreField = new JTextField(20));
+        addSearchField(searchPanel, "Apellido:", apellidoField = new JTextField(20));
 
+        // Botón Buscar
         JButton buscarButton = new JButton("Buscar");
         buscarButton.addActionListener(new BuscarButtonListener());
-        inputPanel.add(buscarButton, BorderLayout.EAST);
+        searchPanel.add(buscarButton);
 
-        searchPanel.add(inputPanel, BorderLayout.NORTH);
-
-        // Panel central para mostrar la información del proveedor en una tabla
-        String[] columnNames = {"CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
-        Object[][] data = new Object[1][7]; // Inicialmente vacío
-        proveedorTable = new JTable(data, columnNames);
+        // Panel para mostrar la información del proveedor en una tabla
+        String[] columnNames = {"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
+        proveedorTable = new JTable(new Object[1][8], columnNames);  // Inicialmente vacío
         JScrollPane scrollPane = new JScrollPane(proveedorTable);
-        searchPanel.add(scrollPane, BorderLayout.CENTER);
+        searchPanel.add(scrollPane);
 
+        // Configurar tabla
+        configurarTabla();
+
+        // Botón Eliminar
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivar inicialmente
+        eliminarButton.setEnabled(false);  // Desactivado inicialmente
         eliminarButton.addActionListener(new EliminarButtonListener());
-        searchPanel.add(eliminarButton, BorderLayout.SOUTH);
+        searchPanel.add(eliminarButton);
 
         add(searchPanel, BorderLayout.CENTER);
 
         // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
-
         JButton backButton = new JButton("Volver");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -75,36 +81,64 @@ public class BajaProveedor extends javax.swing.JFrame {
             }
         });
         buttonPanel.add(backButton);
-
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private class BuscarButtonListener implements ActionListener {
+    private void addSearchField(JPanel panel, String labelText, JTextField textField) {
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPanel.add(new JLabel(labelText));
+        inputPanel.add(textField);
+        panel.add(inputPanel);
+    }
 
+    private void configurarTabla() {
+        proveedorTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        proveedorTable.setEnabled(true);
+
+        proveedorTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int selectedRow = proveedorTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    eliminarButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
+    private class BuscarButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 String codigo = codigoField.getText();
+                String nombreFantasia = nombreFantasiaField.getText();
+                String nombre = nombreField.getText();
+                String apellido = apellidoField.getText();
 
                 ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-                Proveedor proveedor = proveedorDao.obtenerProveedor(codigo);
+                java.util.List<Proveedor> proveedores = proveedorDao.getProveedores(codigo, nombre, apellido, nombreFantasia);
 
-                if (proveedor != null) {
-                    Object[][] data = {
-                        {proveedor.getCuit(), proveedor.getNombreFantasia(), proveedor.getNombre(), proveedor.getApellido(), proveedor.getDni(), proveedor.getTelefono(), proveedor.getEmail()}
-                    };
-                    proveedorTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
-                    ));
-                    eliminarButton.setEnabled(true);  // Habilita el botón eliminar
+                if (!proveedores.isEmpty()) {
+                    Object[][] data = new Object[proveedores.size()][8];
+                    for (int i = 0; i < proveedores.size(); i++) {
+                        Proveedor proveedor = proveedores.get(i);
+                        data[i] = new Object[]{
+                            proveedor.getCodigo(),
+                            proveedor.getCuit(),
+                            proveedor.getNombreFantasia(),
+                            proveedor.getNombre(),
+                            proveedor.getApellido(),
+                            proveedor.getDni(),
+                            proveedor.getTelefono(),
+                            proveedor.getEmail()
+                        };
+                    }
+                    proveedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
+                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                 } else {
-                    Object[][] data = new Object[1][7]; // Tabla vacía
-                    proveedorTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
-                    ));
-                    JOptionPane.showMessageDialog(null, "Proveedor no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
+                    Object[][] data = new Object[0][8]; // Tabla vacía
+                    proveedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
+                    JOptionPane.showMessageDialog(null, "No se encontraron proveedores con esos parámetros.", "Resultado de búsqueda", JOptionPane.INFORMATION_MESSAGE);
                     eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                 }
             } catch (Exception ex) {
@@ -118,22 +152,27 @@ public class BajaProveedor extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                String codigo = codigoField.getText();
+                // Obtener la fila seleccionada de la tabla
+                int selectedRow = proveedorTable.getSelectedRow();
+                String codigo = proveedorTable.getValueAt(selectedRow, 0).toString();
 
                 ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
                 Proveedor proveedor = proveedorDao.obtenerProveedor(codigo);
 
                 if (proveedor != null) {
+                    // Confirmación de eliminación
                     int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar este proveedor?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
 
                     if (confirmacion == JOptionPane.YES_OPTION) {
-                        proveedorDao.eliminarProveedor(codigo);
+                        proveedorDao.eliminarProveedor(codigo, null, null, null);
                         JOptionPane.showMessageDialog(null, "El proveedor ha sido eliminado exitosamente.");
 
-                        proveedorTable.setModel(new javax.swing.table.DefaultTableModel(
-                                new Object[1][7], new String[]{"CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
-                        ));
+                        // Limpiar la tabla y los campos de búsqueda
+                        proveedorTable.setModel(new DefaultTableModel(new Object[0][8], new String[]{"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
                         codigoField.setText("");
+                        nombreFantasiaField.setText("");
+                        nombreField.setText("");
+                        apellidoField.setText("");
                         eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                     } else {
                         JOptionPane.showMessageDialog(null, "Eliminación cancelada.");

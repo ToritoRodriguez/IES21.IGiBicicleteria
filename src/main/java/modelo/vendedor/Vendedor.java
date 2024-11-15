@@ -18,20 +18,9 @@ public class Vendedor extends Persona {
         super();
     }
 
-    public Vendedor(String cuit) {
-        this.cuit = cuit;
-    }
-
+    // Se usa en obtenerVendedor, getVendedores y obtenerVendedorPorId
     public Vendedor(String cuit, String sucursal, String nombre, String apellido, String dni, String telefono, String email) {
         super(nombre, apellido, dni, telefono, email); 
-        this.cuit = cuit;
-        this.sucursal = sucursal;
-    }
-
-    public Vendedor(int id, String codigo, String cuit, String sucursal, String nombre, String apellido, String dni, String telefono, String email) {
-        super(nombre, apellido, dni, telefono, email);
-        this.id = id;
-        this.codigo = codigo;
         this.cuit = cuit;
         this.sucursal = sucursal;
     }
@@ -66,10 +55,5 @@ public class Vendedor extends Persona {
 
     public void setSucursal(String sucursal) {
         this.sucursal = sucursal;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + " CODIGO: " + this.codigo + " SUCURSAL: " + this.sucursal + " CUIT: " + this.cuit;
     }
 }

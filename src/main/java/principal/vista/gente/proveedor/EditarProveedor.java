@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.table.AbstractTableModel;
 import principal.vista.gente.HomeMenuGente;
 import repositorio.dao.proveedor.ProveedorDaoImpl;
 import modelo.proveedor.Proveedor;
@@ -18,22 +19,22 @@ public class EditarProveedor extends javax.swing.JFrame {
     private JTextField codigoField;
     private JTable proveedorTable;
     private JButton buscarButton, modificarButton;
-    
+
     public EditarProveedor() {
         setTitle("Modificar Proveedor");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
+        // Panel de título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Modificar Proveedor", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
+        // Panel de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -47,7 +48,7 @@ public class EditarProveedor extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información del proveedor en una tabla
+        // Tabla para mostrar los datos del proveedor
         String[] columnNames = {"Campo", "Valor"};
         Object[][] data = {
             {"CUIT", ""},
@@ -58,20 +59,20 @@ public class EditarProveedor extends javax.swing.JFrame {
             {"Teléfono", ""},
             {"Email", ""}
         };
-        proveedorTable = new JTable(data, columnNames);
+
+        proveedorTable = new JTable(new ProveedorTableModel(data, columnNames));
         JScrollPane scrollPane = new JScrollPane(proveedorTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         modificarButton = new JButton("Guardar Cambios");
-        modificarButton.setEnabled(false);  // Desactivar inicialmente
+        modificarButton.setEnabled(false);
         modificarButton.addActionListener(new ModificarButtonListener());
         searchPanel.add(modificarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
+        // Panel de botones
         JPanel buttonPanel = new JPanel(new FlowLayout());
-
         JButton backButton = new JButton("Volver");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -81,20 +82,62 @@ public class EditarProveedor extends javax.swing.JFrame {
             }
         });
         buttonPanel.add(backButton);
-
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    // Modelo para la tabla del proveedor
+    private class ProveedorTableModel extends AbstractTableModel {
+
+        private Object[][] data;
+        private String[] columnNames;
+
+        public ProveedorTableModel(Object[][] data, String[] columnNames) {
+            this.data = data;
+            this.columnNames = columnNames;
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.length;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+            return columnNames[columnIndex];
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            return data[rowIndex][columnIndex];
+        }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return columnIndex == 1;  // Solo editable la columna "Valor"
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            if (isCellEditable(rowIndex, columnIndex)) {
+                data[rowIndex][columnIndex] = aValue;
+                fireTableCellUpdated(rowIndex, columnIndex);
+            }
+        }
+    }
+
+    // Listener para el botón de buscar
     private class BuscarButtonListener implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 String codigo = codigoField.getText();
-
-                // Crear una instancia del ProveedorDaoImpl
                 ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-
-                // Llamar al método obtenerProveedor usando la instancia
                 Proveedor proveedor = proveedorDao.obtenerProveedor(codigo);
 
                 if (proveedor != null) {
@@ -105,10 +148,10 @@ public class EditarProveedor extends javax.swing.JFrame {
                     proveedorTable.setValueAt(proveedor.getDni(), 4, 1);
                     proveedorTable.setValueAt(proveedor.getTelefono(), 5, 1);
                     proveedorTable.setValueAt(proveedor.getEmail(), 6, 1);
-                    modificarButton.setEnabled(true);  // Activar el botón modificar
+                    modificarButton.setEnabled(true);  // Habilitar el botón de modificar
                 } else {
                     JOptionPane.showMessageDialog(null, "Proveedor no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                    modificarButton.setEnabled(false);  // Desactivar el botón modificar
+                    modificarButton.setEnabled(false);  // Deshabilitar el botón de modificar
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -116,56 +159,54 @@ public class EditarProveedor extends javax.swing.JFrame {
         }
     }
 
+    // Listener para el botón de modificar
     private class ModificarButtonListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 String codigo = codigoField.getText();
-
                 ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-
                 Proveedor proveedorExistente = proveedorDao.obtenerProveedor(codigo);
 
                 if (proveedorExistente != null) {
                     // Obtener y actualizar los campos
-                    String nuevoCuit = (String) proveedorTable.getValueAt(0, 1); // Obtener CUIT
+                    String nuevoCuit = (String) proveedorTable.getValueAt(0, 1);
                     if (!nuevoCuit.isEmpty()) {
                         proveedorExistente.setCuit(nuevoCuit);
                     }
 
-                    String nuevoNombreFantasia = (String) proveedorTable.getValueAt(1, 1); // Obtener Nombre Fantasía
+                    String nuevoNombreFantasia = (String) proveedorTable.getValueAt(1, 1);
                     if (!nuevoNombreFantasia.isEmpty()) {
                         proveedorExistente.setNombreFantasia(nuevoNombreFantasia);
                     }
 
-                    String nuevoNombre = (String) proveedorTable.getValueAt(2, 1); // Obtener Nombre
+                    String nuevoNombre = (String) proveedorTable.getValueAt(2, 1);
                     if (!nuevoNombre.isEmpty()) {
                         proveedorExistente.setNombre(nuevoNombre);
                     }
 
-                    String nuevoApellido = (String) proveedorTable.getValueAt(3, 1); // Obtener Apellido
+                    String nuevoApellido = (String) proveedorTable.getValueAt(3, 1);
                     if (!nuevoApellido.isEmpty()) {
                         proveedorExistente.setApellido(nuevoApellido);
                     }
 
-                    String nuevoDni = (String) proveedorTable.getValueAt(4, 1); // Obtener DNI
+                    String nuevoDni = (String) proveedorTable.getValueAt(4, 1);
                     if (!nuevoDni.isEmpty()) {
                         proveedorExistente.setDni(nuevoDni);
                     }
 
-                    String nuevoTelefono = (String) proveedorTable.getValueAt(5, 1); // Obtener Teléfono
+                    String nuevoTelefono = (String) proveedorTable.getValueAt(5, 1);
                     if (!nuevoTelefono.isEmpty()) {
                         proveedorExistente.setTelefono(nuevoTelefono);
                     }
 
-                    proveedorTable.getCellEditor().stopCellEditing(); 
-                    String nuevoEmail = (String) proveedorTable.getValueAt(6, 1); // Obtener Email
+                    proveedorTable.getCellEditor().stopCellEditing();
+                    String nuevoEmail = (String) proveedorTable.getValueAt(6, 1);
                     if (!nuevoEmail.isEmpty()) {
                         proveedorExistente.setEmail(nuevoEmail);
                     }
 
-                    // Modificar el proveedor en la base de datos
                     proveedorDao.modificarProveedor(codigo, proveedorExistente);
                     JOptionPane.showMessageDialog(null, "Proveedor modificado con éxito.");
                 } else {

@@ -79,7 +79,7 @@ public class AltaProveedor extends javax.swing.JFrame {
                 String nombreFantasia = nombreFantasiaField.getText();
                 String nombre = nombreField.getText();
                 String apellido = apellidoField.getText();
-                int dni = Integer.parseInt(dniField.getText()); // Asumimos que el DNI es un número entero
+                int dni = Integer.parseInt(dniField.getText());
                 String telefono = telefonoField.getText();
                 String email = emailField.getText();
 

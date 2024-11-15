@@ -70,36 +70,83 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
-    public void eliminarProveedor(String codigo) {
-        String sqlProveedorId = "SELECT id_persona FROM proveedores WHERE codigo = ?";
+    public void eliminarProveedor(String codigo, String nombre, String apellido, String nombreFantasia) {
+        // Consulta para obtener el id_persona asociado al proveedor, con filtros opcionales
+        String sqlProveedorId = "SELECT id_persona FROM proveedores p "
+                + "INNER JOIN personas pe ON pe.id = p.id_persona "
+                + "WHERE 1 = 1 ";
+
+        // Agregar condiciones dinámicamente según los parámetros no nulos
+        if (codigo != null && !codigo.isEmpty()) {
+            sqlProveedorId += " AND p.codigo = ?";
+        }
+        if (nombre != null && !nombre.isEmpty()) {
+            sqlProveedorId += " AND pe.nombre = ?";
+        }
+        if (apellido != null && !apellido.isEmpty()) {
+            sqlProveedorId += " AND pe.apellido = ?";
+        }
+        if (nombreFantasia != null && !nombreFantasia.isEmpty()) {
+            sqlProveedorId += " AND p.nombre_fantasia = ?";
+        }
+
+        // Consultas para eliminar el proveedor y la persona asociada
         String sqlDeletePerson = "DELETE FROM personas WHERE id = ?";
         String sqlDeleteProveedor = "DELETE FROM proveedores WHERE codigo = ?";
+
+        HashMap<Integer, Object> param = new HashMap<>();
+        int paramIndex = 0;
+
+        // Agregar parámetros según los valores no nulos
+        if (codigo != null && !codigo.isEmpty()) {
+            param.put(paramIndex++, codigo);
+        }
+        if (nombre != null && !nombre.isEmpty()) {
+            param.put(paramIndex++, nombre);
+        }
+        if (apellido != null && !apellido.isEmpty()) {
+            param.put(paramIndex++, apellido);
+        }
+        if (nombreFantasia != null && !nombreFantasia.isEmpty()) {
+            param.put(paramIndex++, nombreFantasia);
+        }
+
+        Integer idPersona = null;  // Variable para almacenar el ID de la persona
+
         conexionDb = new ConexionDb();
 
         try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, codigo);  
-
-            System.out.println("Ejecutando consulta para obtener el ID de la persona con el código: " + codigo);
-
+            // Ejecutar la consulta para obtener el id_persona
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedorId, param);
             if (rs.next()) {
-                int personId = rs.getInt("id_persona");
-                System.out.println("ID de la persona asociada al proveedor encontrado: " + personId);
+                idPersona = rs.getInt("id_persona");
 
-                param.clear();
-                param.put(0, codigo);
-                System.out.println("Eliminando proveedor con código: " + codigo);
-                conexionDb.ejecutarConsultaUpdate(sqlDeleteProveedor, param);
+                // Eliminar el proveedor si existe
+                if (idPersona != null) {
+                    // Primero eliminar el proveedor
+                    param.clear();
+                    param.put(0, codigo);
+                    int rowsDeletedProveedor = conexionDb.ejecutarConsultaUpdate(sqlDeleteProveedor, param);
 
-                param.clear();
-                param.put(0, personId);
-                System.out.println("Eliminando persona con ID: " + personId);
-                conexionDb.ejecutarConsultaUpdate(sqlDeletePerson, param);
+                    // Si el proveedor fue eliminado, eliminar también la persona asociada
+                    if (rowsDeletedProveedor > 0) {
+                        param.clear();
+                        param.put(0, idPersona);
+                        int rowsDeletedPerson = conexionDb.ejecutarConsultaUpdate(sqlDeletePerson, param);
 
-                System.out.println("El proveedor y la persona asociada se eliminaron exitosamente.");
+                        if (rowsDeletedPerson > 0) {
+                            System.out.println("El proveedor y la persona asociada se eliminaron exitosamente.");
+                        } else {
+                            System.out.println("No se pudo eliminar la persona asociada al proveedor.");
+                        }
+                    } else {
+                        System.out.println("No se encontró el proveedor con los datos proporcionados.");
+                    }
+                } else {
+                    System.out.println("Proveedor no encontrado, no se pudo eliminar.");
+                }
             } else {
-                System.out.println("Proveedor no encontrado para el código: " + codigo);
+                System.out.println("No se encontró el proveedor con los datos proporcionados.");
             }
         } catch (SQLException e) {
             System.out.println("Error al eliminar el proveedor: " + e.getMessage());
@@ -107,6 +154,7 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
     
     @Override
+    // Metodo para Modificar
     public void modificarProveedor(String codigo, Proveedor proveedor) {
         conexionDb = new ConexionDb();
 
@@ -138,6 +186,7 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
+    // Sirve para la Baja y Modificacion - Lo usamos para buscar
     public Proveedor obtenerProveedor(String codigo) {
         String sqlProveedor = "SELECT * FROM proveedores pr "
                 + "INNER JOIN personas p ON p.id = pr.id_persona "
@@ -172,16 +221,14 @@ public class ProveedorDaoImpl implements IDaoProveedor{
 
     @Override
     // Listado de Proveedores
-    public List<Proveedor> getProveedor(String codigo, String nombre, String apellido) {
+    public List<Proveedor> getProveedores(String codigo, String nombre, String apellido, String nombreFantasia) {
         List<Proveedor> proveedores = new ArrayList<>();
 
-        // Consulta SQL básica
-        String sqlProveedores = "SELECT pr.codigo, pr.nombre_fantasia, p.nombre, p.apellido, p.dni, p.telefono, p.email, pr.cuit "
+        String sqlProveedores = "SELECT pr.codigo, p.nombre, p.apellido, p.dni, p.telefono, p.email, pr.nombre_fantasia, pr.cuit "
                 + "FROM proveedores pr "
                 + "INNER JOIN personas p ON p.id = pr.id_persona "
                 + "WHERE 1 = 1";
 
-        // Construcción dinámica de la consulta SQL según los parámetros de búsqueda.
         if (codigo != null && !codigo.isEmpty()) {
             sqlProveedores += " AND pr.codigo = ?";
         }
@@ -191,14 +238,16 @@ public class ProveedorDaoImpl implements IDaoProveedor{
         if (apellido != null && !apellido.isEmpty()) {
             sqlProveedores += " AND p.apellido = ?";
         }
+        if (nombreFantasia != null && !nombreFantasia.isEmpty()) {
+            sqlProveedores += " AND pr.nombre_fantasia = ?";
+        }
 
         conexionDb = new ConexionDb();
 
         try {
             HashMap<Integer, Object> param = new HashMap<>();
-            int index = 1;
+            int index = 0;
 
-            // Agregar los parámetros de la consulta según los filtros proporcionados.
             if (codigo != null && !codigo.isEmpty()) {
                 param.put(index++, codigo);
             }
@@ -208,25 +257,26 @@ public class ProveedorDaoImpl implements IDaoProveedor{
             if (apellido != null && !apellido.isEmpty()) {
                 param.put(index++, apellido);
             }
+            if (nombreFantasia != null && !nombreFantasia.isEmpty()) {
+                param.put(index++, nombreFantasia);
+            }
 
-            // Ejecutar la consulta con los parámetros especificados.
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedores, param);
 
-            // Procesar los resultados de la consulta.
             while (rs.next()) {
-                // Crear el objeto Proveedor con los datos recuperados
                 Proveedor proveedor = new Proveedor(
-                        rs.getString("codigo"), // Código del proveedor
-                        rs.getString("cuit"), // CUIT del proveedor
-                        rs.getString("nombre_fantasia"), // Nombre de fantasía
-                        rs.getString("nombre"), // Nombre de la persona
-                        rs.getString("apellido"), // Apellido de la persona
-                        rs.getString("dni"), // DNI
-                        rs.getString("telefono"), // Teléfono
-                        rs.getString("email") // Email
+                        rs.getString("codigo"),
+                        rs.getString("cuit"),
+                        rs.getString("nombre_fantasia"),
+                        rs.getString("nombre"),
+                        rs.getString("apellido"),
+                        rs.getString("dni"),
+                        rs.getString("telefono"),
+                        rs.getString("email")
                 );
                 proveedores.add(proveedor);
             }
+
         } catch (SQLException e) {
             System.out.println("Error al obtener la lista de proveedores: " + e.getMessage());
         }
@@ -235,156 +285,31 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
+    // Listado de Proveedores para Lista desplegable
     public List<Proveedor> getProveedoresComboBox() {
         List<Proveedor> proveedores = new ArrayList<>();
 
-        String sqlQuery = "SELECT pr.codigo, pr.nombre_fantasia FROM proveedores pr";  // Traemos código y nombre de fantasía
+        String sqlQuery = "SELECT pr.codigo, pr.nombre_fantasia FROM proveedores pr"; 
 
         try {
-            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlQuery);  // Ejecutamos la consulta
+            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlQuery);  
 
             while (rs.next()) {
                 String codigo = rs.getString("codigo");
                 String nombreFantasia = rs.getString("nombre_fantasia");
 
-                Proveedor proveedor = new Proveedor(codigo, nombreFantasia);  // Creamos el objeto Proveedor
-                proveedores.add(proveedor);  // Agregamos el objeto Proveedor completo a la lista
+                Proveedor proveedor = new Proveedor(codigo, nombreFantasia); 
+                proveedores.add(proveedor); 
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener la lista de proveedores: " + e.getMessage());
         }
 
-        return proveedores;  // Devolvemos la lista de objetos Proveedor
+        return proveedores; 
     }
-
-
     
     @Override
-    public List<Proveedor> getProveedoresPorNombre(String nombre) {
-        List<Proveedor> proveedores = new ArrayList<>();
-
-        // Consulta SQL filtrada por nombre
-        String sqlProveedores = "SELECT pr.codigo, pr.nombre_fantasia, p.nombre, p.apellido, p.dni, p.telefono, p.email, pr.cuit "
-                + "FROM proveedores pr "
-                + "INNER JOIN personas p ON p.id = pr.id_persona "
-                + "WHERE p.nombre LIKE ?";  // Utilizamos LIKE para permitir búsqueda parcial de nombre
-
-        // Crear una nueva instancia de conexión
-        conexionDb = new ConexionDb();
-
-        try {
-            // Parametrizar la búsqueda con un comodín
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, "%" + nombre + "%");  // Utilizamos "%" para realizar una búsqueda parcial por nombre
-
-            // Ejecutar la consulta con el parámetro correspondiente
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedores, param);
-
-            // Procesar los resultados de la consulta
-            while (rs.next()) {
-                Proveedor proveedor = new Proveedor(
-                        rs.getString("codigo"),
-                        rs.getString("cuit"),
-                        rs.getString("nombre_fantasia"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                proveedores.add(proveedor);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de proveedores por nombre: " + e.getMessage());
-        }
-
-        return proveedores;
-    }
-
-
-    @Override
-    public List<Proveedor> getProveedoresPorApellido(String apellido) {
-        List<Proveedor> proveedores = new ArrayList<>();
-
-        // Consulta SQL filtrada por apellido
-        String sqlProveedores = "SELECT pr.codigo, pr.nombre_fantasia, p.nombre, p.apellido, p.dni, p.telefono, p.email, pr.cuit "
-                + "FROM proveedores pr "
-                + "INNER JOIN personas p ON p.id = pr.id_persona "
-                + "WHERE p.apellido = ?";  // Filtramos solo por apellido
-
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, apellido);  // Asignamos el parámetro de apellido
-
-            // Ejecutar la consulta con el parámetro correspondiente
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedores, param);
-
-            // Procesar los resultados de la consulta
-            while (rs.next()) {
-                Proveedor proveedor = new Proveedor(
-                        rs.getString("codigo"),
-                        rs.getString("cuit"),
-                        rs.getString("nombre_fantasia"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                proveedores.add(proveedor);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de proveedores por apellido: " + e.getMessage());
-        }
-
-        return proveedores;
-    }
-
-    @Override
-    public List<Proveedor> getProveedoresPorNombreFantasia(String nombreFantasia) {
-        List<Proveedor> proveedores = new ArrayList<>();
-
-        // Consulta SQL filtrada por nombre de fantasía
-        String sqlProveedores = "SELECT pr.codigo, pr.nombre_fantasia, p.nombre, p.apellido, p.dni, p.telefono, p.email, pr.cuit "
-                + "FROM proveedores pr "
-                + "INNER JOIN personas p ON p.id = pr.id_persona "
-                + "WHERE pr.nombre_fantasia LIKE ?";  // Usamos LIKE para permitir búsqueda parcial
-
-        conexionDb = new ConexionDb();
-
-        try {
-            // Parametrizar la búsqueda con un comodín
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, "%" + nombreFantasia + "%");  // Comodín % para permitir búsqueda parcial
-
-            // Ejecutar la consulta con el parámetro correspondiente
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedores, param);
-
-            // Procesar los resultados de la consulta
-            while (rs.next()) {
-                Proveedor proveedor = new Proveedor(
-                        rs.getString("codigo"),
-                        rs.getString("cuit"),
-                        rs.getString("nombre_fantasia"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                proveedores.add(proveedor);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de proveedores por nombre de fantasía: " + e.getMessage());
-        }
-
-        return proveedores;
-    }
-
-
-    @Override
+    // Sirve para el manejo de codigos
     public String getProximoCodigoProveedor() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM proveedores";
         conexionDb = new ConexionDb();
@@ -401,25 +326,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
         }
 
         return "P-" + Year.now().getValue() + "-1";
-    }
-    
-    public Proveedor buscarProveedorPorCodigo(String codigo) throws SQLException {
-        String sql = "SELECT * FROM proveedores WHERE codigo = ?";
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setString(1, codigo);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                int idProveedor = rs.getInt("id");
-                String nombreFantasia = rs.getString("nombre_fantasia");
-                String cuit = rs.getString("cuit");
-
-                Proveedor proveedor = new Proveedor(idProveedor, codigo, nombreFantasia, cuit);
-                return proveedor;
-            } else {
-                return null;  // Si no se encuentra el proveedor
-            }
-        }
     }
     
     public Proveedor buscarProveedorPorId(int idProveedor) throws SQLException {

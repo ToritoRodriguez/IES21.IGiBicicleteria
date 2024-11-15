@@ -4,13 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import javax.swing.table.DefaultTableModel;
 import principal.vista.gente.HomeMenuGente;
 import repositorio.dao.vendedor.VendedorDaoImpl;
 import modelo.vendedor.Vendedor;
-import java.util.List;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -130,9 +127,14 @@ public class BajaVendedor extends javax.swing.JFrame {
                     for (int i = 0; i < vendedores.size(); i++) {
                         Vendedor vendedor = vendedores.get(i);
                         data[i] = new Object[]{
-                            vendedor.getCodigo(), vendedor.getCuit(), vendedor.getSucursal(),
-                            vendedor.getNombre(), vendedor.getApellido(), vendedor.getDni(),
-                            vendedor.getTelefono(), vendedor.getEmail()
+                            vendedor.getCodigo(), 
+                            vendedor.getCuit(), 
+                            vendedor.getSucursal(),
+                            vendedor.getNombre(), 
+                            vendedor.getApellido(), 
+                            vendedor.getDni(),
+                            vendedor.getTelefono(), 
+                            vendedor.getEmail()
                         };
                     }
                     vendedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));

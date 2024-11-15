@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.table.DefaultTableModel;
 import principal.vista.gente.HomeMenuGente;
 import repositorio.dao.proveedor.ProveedorDaoImpl;
 import modelo.proveedor.Proveedor;
@@ -25,7 +26,7 @@ public class ListarProveedor extends javax.swing.JFrame {
         setTitle("Listar Proveedores");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
         // Panel superior para el título
@@ -55,20 +56,18 @@ public class ListarProveedor extends javax.swing.JFrame {
 
         // Tabla para listar los proveedores
         String[] columnNames = {"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Nombre Fantasía"};
-        proveedoresTable = new JTable(new Object[0][8], columnNames);
+        proveedoresTable = new JTable(new DefaultTableModel(new Object[0][8], columnNames));
         JScrollPane scrollPane = new JScrollPane(proveedoresTable);
         add(scrollPane, BorderLayout.CENTER);
 
         // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
-
         backButton = new JButton("Volver");
         backButton.addActionListener(e -> {
             new HomeMenuGente().setVisible(true);
             dispose();
         });
         buttonPanel.add(backButton);
-
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
@@ -80,26 +79,16 @@ public class ListarProveedor extends javax.swing.JFrame {
             String apellido = apellidoField.getText().trim();
             String nombreFantasia = nombreFantasiaField.getText().trim();
 
-            // Si todos los campos están vacíos, se usa el método general `getProveedor`
-            if (!nombre.isEmpty() && !apellido.isEmpty() && !nombreFantasia.isEmpty()) {
-                actualizarTablaProveedores(nombre, apellido, nombreFantasia);  // Buscar por nombre, apellido y nombre de fantasía
-            } else if (!nombre.isEmpty()) {
-                actualizarTablaProveedoresPorNombre(nombre);  // Buscar solo por nombre
-            } else if (!apellido.isEmpty()) {
-                actualizarTablaProveedoresPorApellido(apellido);  // Buscar solo por apellido
-            } else if (!nombreFantasia.isEmpty()) {
-                actualizarTablaProveedoresPorNombreFantasia(nombreFantasia);  // Buscar solo por nombre de fantasía
-            } else {
-                actualizarTablaProveedores(null, null, null);  // Si todos los campos están vacíos, traer todos los proveedores
-            }
+            actualizarTablaProveedores(nombre.isEmpty() ? null : nombre,
+                    apellido.isEmpty() ? null : apellido,
+                    nombreFantasia.isEmpty() ? null : nombreFantasia);
         }
     }
 
     private void actualizarTablaProveedores(String nombre, String apellido, String nombreFantasia) {
         ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-        List<Proveedor> proveedores = proveedorDao.getProveedor(nombre, apellido, nombreFantasia); // Llamada al método con todos los filtros
+        List<Proveedor> proveedores = proveedorDao.getProveedores(null, nombre, apellido, nombreFantasia);
 
-        // Convertir la lista de proveedores a una estructura de datos que la JTable pueda usar
         Object[][] data = new Object[proveedores.size()][8];
         for (int i = 0; i < proveedores.size(); i++) {
             Proveedor proveedor = proveedores.get(i);
@@ -113,86 +102,23 @@ public class ListarProveedor extends javax.swing.JFrame {
             data[i][7] = proveedor.getNombreFantasia();
         }
 
-        // Establecer los datos en la tabla
-        proveedoresTable.setModel(new javax.swing.table.DefaultTableModel(
+        proveedoresTable.setModel(new ProveedoresTableModel(
                 data,
                 new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Nombre Fantasía"}
         ));
     }
 
-    private void actualizarTablaProveedoresPorNombre(String nombre) {
-        ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-        List<Proveedor> proveedores = proveedorDao.getProveedoresPorNombre(nombre); // Llamada al método específico por nombre
+    private class ProveedoresTableModel extends DefaultTableModel {
 
-        // Convertir la lista de proveedores a una estructura de datos que la JTable pueda usar
-        Object[][] data = new Object[proveedores.size()][8];
-        for (int i = 0; i < proveedores.size(); i++) {
-            Proveedor proveedor = proveedores.get(i);
-            data[i][0] = proveedor.getCodigo();
-            data[i][1] = proveedor.getCuit();
-            data[i][2] = proveedor.getNombre();
-            data[i][3] = proveedor.getApellido();
-            data[i][4] = proveedor.getDni();
-            data[i][5] = proveedor.getTelefono();
-            data[i][6] = proveedor.getEmail();
-            data[i][7] = proveedor.getNombreFantasia();
+        public ProveedoresTableModel(Object[][] data, String[] columnNames) {
+            super(data, columnNames);
         }
 
-        // Establecer los datos en la tabla
-        proveedoresTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Nombre Fantasía"}
-        ));
-    }
-
-    private void actualizarTablaProveedoresPorApellido(String apellido) {
-        ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-        List<Proveedor> proveedores = proveedorDao.getProveedoresPorApellido(apellido); // Llamada al método específico por apellido
-
-        // Convertir la lista de proveedores a una estructura de datos que la JTable pueda usar
-        Object[][] data = new Object[proveedores.size()][8];
-        for (int i = 0; i < proveedores.size(); i++) {
-            Proveedor proveedor = proveedores.get(i);
-            data[i][0] = proveedor.getCodigo();
-            data[i][1] = proveedor.getCuit();
-            data[i][2] = proveedor.getNombre();
-            data[i][3] = proveedor.getApellido();
-            data[i][4] = proveedor.getDni();
-            data[i][5] = proveedor.getTelefono();
-            data[i][6] = proveedor.getEmail();
-            data[i][7] = proveedor.getNombreFantasia();
+        // Anula el método isCellEditable para que todas las celdas sean no editables
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;  // Devuelve falso para hacer las celdas no editables
         }
-
-        // Establecer los datos en la tabla
-        proveedoresTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Nombre Fantasía"}
-        ));
-    }
-
-    private void actualizarTablaProveedoresPorNombreFantasia(String nombreFantasia) {
-        ProveedorDaoImpl proveedorDao = new ProveedorDaoImpl();
-        List<Proveedor> proveedores = proveedorDao.getProveedoresPorNombreFantasia(nombreFantasia); // Llamada al método específico por nombre de fantasía
-
-        // Convertir la lista de proveedores a una estructura de datos que la JTable pueda usar
-        Object[][] data = new Object[proveedores.size()][8];
-        for (int i = 0; i < proveedores.size(); i++) {
-            Proveedor proveedor = proveedores.get(i);
-            data[i][0] = proveedor.getCodigo();
-            data[i][1] = proveedor.getCuit();
-            data[i][2] = proveedor.getNombre();
-            data[i][3] = proveedor.getApellido();
-            data[i][4] = proveedor.getDni();
-            data[i][5] = proveedor.getTelefono();
-            data[i][6] = proveedor.getEmail();
-            data[i][7] = proveedor.getNombreFantasia();
-        }
-
-        // Establecer los datos en la tabla
-        proveedoresTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Nombre Fantasía"}
-        ));
     }
 
     /**

@@ -16,29 +16,20 @@ public class Cliente extends Persona {
     public Cliente() {
         super();
     }
-
-    public Cliente(String cuil) {
-        this.cuil = cuil;
-    }
     
+    // Este constructor se usa en obtenerCliente
     public Cliente(String cuil, String nombre, String apellido, String dni, String telefono, String email) {
         super(nombre, apellido, dni, telefono, email);
         this.cuil = cuil;
     }
     
+    // Este constructor se usa en obtenerClientePorId y getClientes
     public Cliente(String codigo, String cuil, String nombre, String apellido, String dni, String telefono, String email) {
         super(nombre, apellido, dni, telefono, email);
         this.codigo = codigo; 
         this.cuil = cuil;
     }
 
-    public Cliente(int id, String codigo, String cuil, String nombre, String apellido, String dni, String telefono, String email) {
-        super(nombre, apellido, dni, telefono, email);
-        this.id = id;
-        this.codigo = codigo;
-        this.cuil = cuil;
-    }
-    
     public int getId() {
         return id;
     }
@@ -61,10 +52,5 @@ public class Cliente extends Persona {
 
     public void setCuil(String cuil) {
         this.cuil = cuil;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + " CODIGO: " + this.getCodigo() + " CUIL: " + this.cuil;
     }
 }

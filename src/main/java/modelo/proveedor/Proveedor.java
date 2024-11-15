@@ -17,29 +17,30 @@ public class Proveedor extends Persona{
     public Proveedor() {
         super();
     }
-
-    public Proveedor(String cuit) {
-        this.cuit = cuit;
-    }
-
+    
+    // Este constuctor se usa en obtenerProducto y getProductos
     public Proveedor(String codigo, String nombreFantasia, String cuit) {
         this.codigo = codigo;
         this.nombreFantasia = nombreFantasia;
         this.cuit = cuit;
     }
 
+    // Este constructor se usa en obtenerProveedor
     public Proveedor(String cuit, String nombreFantasia, String nombre, String apellido, String dni, String telefono, String email) {
         super(nombre, apellido, dni, telefono, email);
         this.nombreFantasia = nombreFantasia;
         this.cuit = cuit;
     }
     
+    // Este constructor se usa en getProveedores
     public Proveedor(String codigo, String cuit, String nombreFantasia, String nombre, String apellido, String dni, String telefono, String email) {
         super(nombre, apellido, dni, telefono, email);
+        this.codigo = codigo;  
         this.nombreFantasia = nombreFantasia;
         this.cuit = cuit;
     }
 
+    // Este constructor se usa en buscarProveedorPorId
     public Proveedor(int id, String codigo, String nombreFantasia, String cuit) {
         this.id = id;
         this.codigo = codigo;
@@ -47,11 +48,12 @@ public class Proveedor extends Persona{
         this.cuit = cuit;
     }
     
+    // Este constructor se usa en getProveedoresComboBox
     public Proveedor(String codigo, String nombreFantasia) {
         this.codigo = codigo;
         this.nombreFantasia = nombreFantasia;
     }
-
+    
     public int getId() {
         return id;
     }
@@ -82,10 +84,5 @@ public class Proveedor extends Persona{
 
     public void setNombreFantasia(String nombreFantasia) {
         this.nombreFantasia = nombreFantasia;
-    }
-
-    @Override
-    public String toString() {
-        return this.getNombreFantasia();  // Solo devolvemos el nombre de fantasía
     }
 }
