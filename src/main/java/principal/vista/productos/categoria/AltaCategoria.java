@@ -25,7 +25,6 @@ public class AltaCategoria extends javax.swing.JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridLayout(4, 2, 10, 10));
 
-        // Agregamos los componentes del formulario
         add(new JLabel("Tipo de Categoría:"));
         tipoCategoriaComboBox = new JComboBox<>(new String[]{"BICICLETA", "ACCESORIO", "REPUESTO"});
         add(tipoCategoriaComboBox);
@@ -54,7 +53,6 @@ public class AltaCategoria extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                // Obtener los datos del formulario
                 String nombreCategoria = nombreCategoriaField.getText();
                 String tipoCategoria = (String) tipoCategoriaComboBox.getSelectedItem();
 
@@ -63,7 +61,6 @@ public class AltaCategoria extends javax.swing.JFrame {
                     return;
                 }
 
-                // Convertir tipoCategoria (String) a tipo enumerado
                 TipoCategoria tipo = null;
                 if (tipoCategoria.equals("BICICLETA")) {
                     tipo = TipoCategoria.BICICLETA;
@@ -73,17 +70,13 @@ public class AltaCategoria extends javax.swing.JFrame {
                     tipo = TipoCategoria.RESPUESTO;
                 }
 
-                // Crear un objeto Categoria
                 Categoria categoria = new Categoria(nombreCategoria, tipo);
 
-                // Utilizar CategoriaDaoImpl para insertar la nueva categoría
                 CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
                 categoriaDao.insertarNuevaCategoria(categoria); // Aquí se usa el método insertarNuevaCategoria
 
-                // Mostrar un mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Categoría dada de alta exitosamente.");
             } catch (Exception ex) {
-                // Manejo de excepciones
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }

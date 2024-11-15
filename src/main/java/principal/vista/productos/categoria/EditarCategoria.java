@@ -23,17 +23,15 @@ public class EditarCategoria extends javax.swing.JFrame {
         setTitle("Modificar Categoría");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);  
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Modificar Categoría", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -47,21 +45,19 @@ public class EditarCategoria extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información de la categoría en una tabla
         String[] columnNames = {"Código", "Nombre", "Tipo"};
-        Object[][] data = new Object[1][3]; // Inicialmente vacío
+        Object[][] data = new Object[1][3];
         categoriaTable = new JTable(data, columnNames);
         JScrollPane scrollPane = new JScrollPane(categoriaTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         modificarButton = new JButton("Guardar Cambios");
-        modificarButton.setEnabled(false);  // Desactivar inicialmente
+        modificarButton.setEnabled(false); 
         modificarButton.addActionListener(new ModificarButtonListener());
         searchPanel.add(modificarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         JButton backButton = new JButton("Volver");
@@ -82,7 +78,7 @@ public class EditarCategoria extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                String input = codigoField.getText().trim();  // Obtenemos el valor ingresado
+                String input = codigoField.getText().trim();  
 
                 if (input.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Por favor, ingrese un código de categoría.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -90,22 +86,20 @@ public class EditarCategoria extends javax.swing.JFrame {
                 }
 
                 CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-                // Usamos obtenerCategoria con código de tipo String
-                Categoria categoria = categoriaDao.obtenerCategoria(input, null, null);  // No filtramos por nombre ni tipo
+                Categoria categoria = categoriaDao.obtenerCategoria(input, null, null);  
 
                 if (categoria != null) {
-                    // Actualizamos la tabla con la información de la categoría (Código, Nombre y Tipo)
                     Object[][] data = {
-                        {categoria.getCodigo(), categoria.getNombre(), categoria.getTipo().toString()} // Aquí agregamos el Tipo
+                        {categoria.getCodigo(), categoria.getNombre(), categoria.getTipo().toString()} 
                     };
                     categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
                             data,
-                            new String[]{"Código", "Nombre", "Tipo"} // Actualizamos las columnas
+                            new String[]{"Código", "Nombre", "Tipo"} 
                     ));
-                    modificarButton.setEnabled(true);  // Habilitar el botón de modificar
+                    modificarButton.setEnabled(true);  
                 } else {
                     JOptionPane.showMessageDialog(null, "Categoría no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
-                    modificarButton.setEnabled(false);  // Desactivar el botón modificar
+                    modificarButton.setEnabled(false);  
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -118,17 +112,16 @@ public class EditarCategoria extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                int selectedRow = categoriaTable.getSelectedRow();  // Obtener la fila seleccionada en la tabla
+                int selectedRow = categoriaTable.getSelectedRow();  
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(null, "Por favor, seleccione una categoría para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Obtener el código de la categoría como String
-                String codigo = (String) categoriaTable.getValueAt(selectedRow, 0);  // Obtener el código de la categoría
+                String codigo = (String) categoriaTable.getValueAt(selectedRow, 0);  
                
                 categoriaTable.getCellEditor().stopCellEditing();
-                String nuevoNombre = (String) categoriaTable.getValueAt(selectedRow, 1);  // Obtener el nuevo nombre de la categoría
+                String nuevoNombre = (String) categoriaTable.getValueAt(selectedRow, 1); 
 
                 if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(null, "El nombre de la categoría no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -136,22 +129,20 @@ public class EditarCategoria extends javax.swing.JFrame {
                 }
 
                 CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-                // Buscar la categoría por código (que ahora es de tipo String)
-                Categoria categoriaExistente = categoriaDao.obtenerCategoria(codigo, null, null);  // Usamos solo el código
+                Categoria categoriaExistente = categoriaDao.obtenerCategoria(codigo, null, null);
 
                 if (categoriaExistente != null) {
-                    categoriaExistente.setCategoria(nuevoNombre);  // Actualizar el nombre de la categoría
-                    categoriaDao.modificarCategoria(codigo, categoriaExistente);  // Guardar los cambios en la base de datos
+                    categoriaExistente.setCategoria(nuevoNombre);  
+                    categoriaDao.modificarCategoria(codigo, categoriaExistente);  
                     JOptionPane.showMessageDialog(null, "Categoría modificada con éxito.");
 
-                    // Ahora, después de modificar, recargamos la información
-                    Categoria categoriaModificada = categoriaDao.obtenerCategoria(codigo, null, null); // Obtener los datos actualizados
+                    Categoria categoriaModificada = categoriaDao.obtenerCategoria(codigo, null, null); 
                     Object[][] data = {
                         {categoriaModificada.getCodigo(), categoriaModificada.getCategoria(), categoriaModificada.getTipo().toString()}
                     };
                     categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
                             data,
-                            new String[]{"Código", "Nombre", "Tipo"} // Actualizamos las columnas con la nueva información
+                            new String[]{"Código", "Nombre", "Tipo"} 
                     ));
                 } else {
                     JOptionPane.showMessageDialog(null, "Categoría no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);

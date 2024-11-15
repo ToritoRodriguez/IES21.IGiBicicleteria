@@ -29,14 +29,12 @@ public class ListarProveedor extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Listar Proveedores", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de filtro para nombre, apellido y nombre de fantasía
         JPanel filterPanel = new JPanel(new GridLayout(1, 7, 10, 10));
         filterPanel.add(new JLabel("Nombre:"));
         nombreField = new JTextField();
@@ -54,13 +52,11 @@ public class ListarProveedor extends javax.swing.JFrame {
 
         add(filterPanel, BorderLayout.NORTH);
 
-        // Tabla para listar los proveedores
         String[] columnNames = {"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Nombre Fantasía"};
         proveedoresTable = new JTable(new DefaultTableModel(new Object[0][8], columnNames));
         JScrollPane scrollPane = new JScrollPane(proveedoresTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
         backButton = new JButton("Volver");
         backButton.addActionListener(e -> {
@@ -114,10 +110,9 @@ public class ListarProveedor extends javax.swing.JFrame {
             super(data, columnNames);
         }
 
-        // Anula el método isCellEditable para que todas las celdas sean no editables
         @Override
         public boolean isCellEditable(int row, int column) {
-            return false;  // Devuelve falso para hacer las celdas no editables
+            return false;  
         }
     }
 

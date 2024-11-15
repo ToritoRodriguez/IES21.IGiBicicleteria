@@ -20,7 +20,6 @@ public class ClienteDaoImpl implements IDaoCliente{
     private ConexionDb conexionDb;
 
     @Override
-    // Metodo para insertar
     public void insertarNuevoCliente(Cliente cliente) {
         
         String codigoCliente = getProximoCodigoCliente();
@@ -72,7 +71,6 @@ public class ClienteDaoImpl implements IDaoCliente{
     }
 
     @Override
-    // Metodo para Eliminar
     public void eliminarCliente(String codigo, String nombre, String apellido) {
         String sqlClientId = "SELECT id_persona FROM clientes c "
                 + "INNER JOIN personas p ON p.id = c.id_persona "
@@ -141,7 +139,6 @@ public class ClienteDaoImpl implements IDaoCliente{
     }
     
     @Override
-    // Metodo para Modificar
     public void modificarCliente(String codigo, Cliente cliente) {
         conexionDb = new ConexionDb();
 
@@ -179,7 +176,6 @@ public class ClienteDaoImpl implements IDaoCliente{
     }
 
     @Override
-    // Listado de Clientes
     public List<Cliente> getClientes(String codigo, String nombre, String apellido) {
         List<Cliente> clientes = new ArrayList<>();
         String sqlClients = "SELECT c.codigo, p.nombre, p.apellido, p.dni, p.telefono, p.email, c.cuil "
@@ -215,7 +211,6 @@ public class ClienteDaoImpl implements IDaoCliente{
             }
 
             try (ResultSet rs = stmt.executeQuery()) {
-                System.out.println("Ejecutando consulta...");
                 int clienteCount = 0;
 
                 while (rs.next()) {
@@ -232,7 +227,6 @@ public class ClienteDaoImpl implements IDaoCliente{
                     clientes.add(cliente);
                     clienteCount++;
                 }
-                System.out.println("Numero total de clientes encontrados: " + clienteCount);
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener la lista de clientes: " + e.getMessage());
@@ -242,7 +236,6 @@ public class ClienteDaoImpl implements IDaoCliente{
     }
 
     @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar por codigo
     public Cliente obtenerCliente(String codigo) {
         String sqlClient = "SELECT * FROM clientes c "
                 + "INNER JOIN personas p ON p.id = c.id_persona "
@@ -255,7 +248,6 @@ public class ClienteDaoImpl implements IDaoCliente{
             HashMap<Integer, Object> param = new HashMap<>();
             param.put(0, codigo);
 
-            System.out.println("Parámetro 'codigo' añadido correctamente al HashMap: " + param.get(0));
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlClient, param);
 
             if (rs != null && rs.next()) {
@@ -275,7 +267,6 @@ public class ClienteDaoImpl implements IDaoCliente{
         return cliente;
     }
     
-    // Sirve para el manejo de codigos
     public String getProximoCodigoCliente(){
         String sqlNextCode = "SELECT MAX(id) AS total FROM clientes";
         conexionDb = new ConexionDb();

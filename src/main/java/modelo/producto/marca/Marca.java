@@ -13,28 +13,28 @@ public class Marca {
     private String codigo;
     private String marca;
     private List<Modelo> modelos;
-
-    public Marca(int id, String marca) {
-        this.id = id;
-        this.marca = marca;
-    }
     
+    // Este constructor se usa en getMarcas y obtenerMarca
     public Marca(String marca) {
         this.marca = marca;
         this.modelos = new ArrayList<>();
     }
 
-    // Setter para el código
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;  // Asegúrate de que esta línea esté presente
-    }
-
+    // Get and Set
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+    
+    public String getCodigo() {
+        return codigo;
+    }
+    
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;  
     }
 
     public String getMarca() {
@@ -44,10 +44,6 @@ public class Marca {
     public void setMarca(String marca) {
         this.marca = marca;
     }
-
-    public String getCodigo() {
-        return codigo;
-    }
     
     public List<Modelo> getModelos() {
         return modelos;
@@ -55,10 +51,5 @@ public class Marca {
 
     public void setModelos(List<Modelo> modelos) {
         this.modelos = modelos;
-    }
-
-    @Override
-    public String toString() {
-        return "ID: " + this.getId() + ", Marca: " + this.getMarca();
     }
 }

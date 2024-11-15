@@ -159,7 +159,6 @@ public class EditarMarca extends javax.swing.JFrame {
                 Marca marcaExistente = marcaDao.obtenerMarca(codigo, null);
 
                 if (marcaExistente != null) {
-                    // Obtener y actualizar los campos
                     String nuevoCodigo = (String) marcaTable.getValueAt(0, 1);
                     if (!nuevoCodigo.isEmpty()) {
                         marcaExistente.setCodigo(nuevoCodigo);

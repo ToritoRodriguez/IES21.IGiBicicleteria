@@ -37,8 +37,7 @@ public class BajaMarca extends javax.swing.JFrame {
 
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
-        // Panel de búsqueda
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));  // Cambié a GridLayout(5, 2)
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));  
 
         inputPanel.add(new JLabel("Código:"));
         codigoField = new JTextField();
@@ -50,13 +49,12 @@ public class BajaMarca extends javax.swing.JFrame {
 
         JButton buscarButton = new JButton("Buscar");
         buscarButton.addActionListener(new BuscarButtonListener());
-        inputPanel.add(buscarButton);  // Se añade al final del GridLayout
+        inputPanel.add(buscarButton);  
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Tabla de marcas
         String[] columnNames = {"Código", "Marca"};
-        Object[][] data = new Object[0][2];  // Tabla vacía por defecto
+        Object[][] data = new Object[0][2];  
         marcaTable = new JTable(data, columnNames);
         configurarTabla();
         JScrollPane scrollPane = new JScrollPane(marcaTable);
@@ -65,7 +63,7 @@ public class BajaMarca extends javax.swing.JFrame {
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivado hasta que se seleccione una fila
+        eliminarButton.setEnabled(false); 
         eliminarButton.addActionListener(new EliminarButtonListener());
         searchPanel.add(eliminarButton, BorderLayout.SOUTH);
 
@@ -122,12 +120,12 @@ public class BajaMarca extends javax.swing.JFrame {
                         };
                     }
                     marcaTable.setModel(new DefaultTableModel(data, new String[]{"Código", "Marca"}));
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 } else {
-                    Object[][] data = new Object[0][2]; // Tabla vacía
+                    Object[][] data = new Object[0][2]; 
                     marcaTable.setModel(new DefaultTableModel(data, new String[]{"Código", "Marca"}));
                     JOptionPane.showMessageDialog(null, "No se encontraron marcas con esos parámetros.", "Resultado de búsqueda", JOptionPane.INFORMATION_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -154,17 +152,16 @@ public class BajaMarca extends javax.swing.JFrame {
 
                         JOptionPane.showMessageDialog(null, "La marca ha sido eliminada exitosamente.");
 
-                        // Limpiar la tabla y los campos de búsqueda
                         marcaTable.setModel(new DefaultTableModel(new Object[0][2], new String[]{"Código", "Marca"}));
                         nombreMarcaField.setText("");
                         codigoField.setText("");
-                        eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                        eliminarButton.setEnabled(false); 
                     } else {
                         JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Marca no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false); 
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

@@ -64,10 +64,4 @@ public abstract class Persona {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    @Override
-    public String toString() {
-        return "NOMBRE: " + this.nombre + " APELLIDO: " + this.apellido + " DNI: " + this.dni +
-                " TELEFONO: " + this.telefono + " EMAIL: " + this.email;
-    }
 }

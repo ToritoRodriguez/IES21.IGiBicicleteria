@@ -25,18 +25,14 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
-    // Metodo para insertar
     public void insertarNuevoProveedor(Proveedor proveedor) {
-        // Obtener el próximo código de proveedor
         String codigoProveedor = getProximoCodigoProveedor();
 
-        // Consultas SQL para insertar en las tablas correspondientes
         String sqlPersona = "INSERT INTO personas (nombre, apellido, dni, email, telefono) VALUES (?, ?, ?, ?, ?)";
         String sqlProveedor = "INSERT INTO proveedores (id_persona, codigo, nombre_fantasia, cuit) VALUES (?, ?, ?, ?)";
 
         conexionDb = new ConexionDb();
         try {
-            // Preparar la consulta para insertar la persona
             PreparedStatement stmtPersona = conexionDb.obtenerConexion().prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS);
             stmtPersona.setString(1, proveedor.getNombre());
             stmtPersona.setString(2, proveedor.getApellido());
@@ -44,23 +40,19 @@ public class ProveedorDaoImpl implements IDaoProveedor{
             stmtPersona.setString(4, proveedor.getEmail());
             stmtPersona.setString(5, proveedor.getTelefono());
 
-            // Ejecutar la inserción de la persona
             int affectedRowsPersona = stmtPersona.executeUpdate();
 
             if (affectedRowsPersona > 0) {
-                // Obtener el ID de la persona insertada
                 ResultSet generatedKeysPersona = stmtPersona.getGeneratedKeys();
                 if (generatedKeysPersona.next()) {
                     int personId = generatedKeysPersona.getInt(1);
 
-                    // Preparar la consulta para insertar el proveedor
                     PreparedStatement stmtProveedor = conexionDb.obtenerConexion().prepareStatement(sqlProveedor);
                     stmtProveedor.setInt(1, personId);
                     stmtProveedor.setString(2, codigoProveedor);
                     stmtProveedor.setString(3, proveedor.getNombreFantasia());
                     stmtProveedor.setString(4, proveedor.getCuit());
 
-                    // Ejecutar la inserción del proveedor
                     int affectedRowsProveedor = stmtProveedor.executeUpdate();
 
                     if (affectedRowsProveedor > 0) {
@@ -78,14 +70,11 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
-    // Metodo para Eliminar
     public void eliminarProveedor(String codigo, String nombre, String apellido, String nombreFantasia) {
-        // Consulta para obtener el id_persona asociado al proveedor, con filtros opcionales
         String sqlProveedorId = "SELECT id_persona FROM proveedores p "
                 + "INNER JOIN personas pe ON pe.id = p.id_persona "
                 + "WHERE 1 = 1 ";
 
-        // Agregar condiciones dinámicamente según los parámetros no nulos
         if (codigo != null && !codigo.isEmpty()) {
             sqlProveedorId += " AND p.codigo = ?";
         }
@@ -99,14 +88,12 @@ public class ProveedorDaoImpl implements IDaoProveedor{
             sqlProveedorId += " AND p.nombre_fantasia = ?";
         }
 
-        // Consultas para eliminar el proveedor y la persona asociada
         String sqlDeletePerson = "DELETE FROM personas WHERE id = ?";
         String sqlDeleteProveedor = "DELETE FROM proveedores WHERE codigo = ?";
 
         HashMap<Integer, Object> param = new HashMap<>();
         int paramIndex = 0;
 
-        // Agregar parámetros según los valores no nulos
         if (codigo != null && !codigo.isEmpty()) {
             param.put(paramIndex++, codigo);
         }
@@ -120,24 +107,20 @@ public class ProveedorDaoImpl implements IDaoProveedor{
             param.put(paramIndex++, nombreFantasia);
         }
 
-        Integer idPersona = null;  // Variable para almacenar el ID de la persona
+        Integer idPersona = null;  
 
         conexionDb = new ConexionDb();
 
         try {
-            // Ejecutar la consulta para obtener el id_persona
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlProveedorId, param);
             if (rs.next()) {
                 idPersona = rs.getInt("id_persona");
 
-                // Eliminar el proveedor si existe
                 if (idPersona != null) {
-                    // Primero eliminar el proveedor
                     param.clear();
                     param.put(0, codigo);
                     int rowsDeletedProveedor = conexionDb.ejecutarConsultaUpdate(sqlDeleteProveedor, param);
 
-                    // Si el proveedor fue eliminado, eliminar también la persona asociada
                     if (rowsDeletedProveedor > 0) {
                         param.clear();
                         param.put(0, idPersona);
@@ -163,7 +146,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
     
     @Override
-    // Metodo para Modificar
     public void modificarProveedor(String codigo, Proveedor proveedor) {
         conexionDb = new ConexionDb();
 
@@ -195,7 +177,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
 
     @Override
-    // Listado de Proveedores
     public List<Proveedor> getProveedores(String codigo, String nombre, String apellido, String nombreFantasia) {
         List<Proveedor> proveedores = new ArrayList<>();
 
@@ -260,7 +241,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
     
     @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar
     public Proveedor obtenerProveedor(String codigo) {
         String sqlProveedor = "SELECT * FROM proveedores pr "
                 + "INNER JOIN personas p ON p.id = pr.id_persona "
@@ -294,7 +274,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
     }
     
     @Override
-    // Listado de Proveedores para Lista desplegable
     public List<Proveedor> getProveedoresComboBox() {
         List<Proveedor> proveedores = new ArrayList<>();
 
@@ -317,7 +296,6 @@ public class ProveedorDaoImpl implements IDaoProveedor{
         return proveedores;
     }
     
-    // Sirve para el manejo de codigos
     public String getProximoCodigoProveedor() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM proveedores";
         conexionDb = new ConexionDb();

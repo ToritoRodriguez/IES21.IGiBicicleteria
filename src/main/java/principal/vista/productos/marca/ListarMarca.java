@@ -24,17 +24,15 @@ public class ListarMarca extends javax.swing.JFrame {
         setTitle("Listar Marcas");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null); 
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Listar Marcas", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de filtro para el código de la marca (opcional) y nombre
         JPanel filterPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         filterPanel.add(new JLabel("Código de la Marca (Opcional):"));
         codigoField = new JTextField();
@@ -45,18 +43,16 @@ public class ListarMarca extends javax.swing.JFrame {
         filterPanel.add(nombreField);
 
         listarButton = new JButton("Listar");
-        listarButton.addActionListener(new ListarButtonListener());  // Pasamos el campo de código al listener
+        listarButton.addActionListener(new ListarButtonListener()); 
         filterPanel.add(listarButton);
 
         add(filterPanel, BorderLayout.NORTH);
 
-        // Tabla para listar las marcas
         String[] columnNames = {"Código", "Nombre"};
         marcaTable = new JTable(new Object[0][2], columnNames);
         JScrollPane scrollPane = new JScrollPane(marcaTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         backButton = new JButton("Volver");
@@ -76,32 +72,27 @@ public class ListarMarca extends javax.swing.JFrame {
             String codigoText = codigoField.getText().trim();
             String nombreText = nombreField.getText().trim();
 
-            // Llamar al método para obtener marcas filtradas
             actualizarTablaMarcas(codigoText.isEmpty() ? null : codigoText, nombreText.isEmpty() ? null : nombreText);
         }
     }
 
     private void actualizarTablaMarcas(String codigo, String nombre) {
         MarcaDaoImpl marcaDao = new MarcaDaoImpl();
-        List<Marca> marcas = marcaDao.getMarcas(codigo, nombre);  // Pasamos tanto código como nombre al método
+        List<Marca> marcas = marcaDao.getMarcas(codigo, nombre);  
 
-        // Depuración: muestra el número de marcas encontradas
         System.out.println("Número de marcas encontradas: " + marcas.size());
 
-        // Crear los datos para la tabla
         Object[][] data = new Object[marcas.size()][2];
         for (int i = 0; i < marcas.size(); i++) {
             Marca marca = marcas.get(i);
-            data[i][0] = marca.getCodigo();  // Asegúrate de que el código se obtiene correctamente
+            data[i][0] = marca.getCodigo();  
             data[i][1] = marca.getMarca();
         }
 
-        // Si no se encontraron marcas, muestra un mensaje
         if (marcas.size() == 0) {
             JOptionPane.showMessageDialog(this, "No se encontraron marcas con los filtros proporcionados.");
         }
 
-        // Actualizar la tabla con los resultados
         marcaTable.setModel(new javax.swing.table.DefaultTableModel(
                 data,
                 new String[]{"Código", "Nombre"}

@@ -27,14 +27,12 @@ public class EditarProveedor extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel de título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Modificar Proveedor", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -48,7 +46,6 @@ public class EditarProveedor extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Tabla para mostrar los datos del proveedor
         String[] columnNames = {"Campo", "Valor"};
         Object[][] data = {
             {"CUIT", ""},
@@ -71,7 +68,6 @@ public class EditarProveedor extends javax.swing.JFrame {
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel de botones
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton backButton = new JButton("Volver");
         backButton.addActionListener(new ActionListener() {
@@ -85,7 +81,6 @@ public class EditarProveedor extends javax.swing.JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // Modelo para la tabla del proveedor
     private class ProveedorTableModel extends AbstractTableModel {
 
         private Object[][] data;
@@ -118,7 +113,7 @@ public class EditarProveedor extends javax.swing.JFrame {
 
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == 1;  // Solo editable la columna "Valor"
+            return columnIndex == 1;  
         }
 
         @Override
@@ -130,7 +125,6 @@ public class EditarProveedor extends javax.swing.JFrame {
         }
     }
 
-    // Listener para el botón de buscar
     private class BuscarButtonListener implements ActionListener {
 
         @Override
@@ -148,10 +142,10 @@ public class EditarProveedor extends javax.swing.JFrame {
                     proveedorTable.setValueAt(proveedor.getDni(), 4, 1);
                     proveedorTable.setValueAt(proveedor.getTelefono(), 5, 1);
                     proveedorTable.setValueAt(proveedor.getEmail(), 6, 1);
-                    modificarButton.setEnabled(true);  // Habilitar el botón de modificar
+                    modificarButton.setEnabled(true);  
                 } else {
                     JOptionPane.showMessageDialog(null, "Proveedor no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                    modificarButton.setEnabled(false);  // Deshabilitar el botón de modificar
+                    modificarButton.setEnabled(false);
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -159,7 +153,6 @@ public class EditarProveedor extends javax.swing.JFrame {
         }
     }
 
-    // Listener para el botón de modificar
     private class ModificarButtonListener implements ActionListener {
 
         @Override
@@ -170,7 +163,6 @@ public class EditarProveedor extends javax.swing.JFrame {
                 Proveedor proveedorExistente = proveedorDao.obtenerProveedor(codigo);
 
                 if (proveedorExistente != null) {
-                    // Obtener y actualizar los campos
                     String nuevoCuit = (String) proveedorTable.getValueAt(0, 1);
                     if (!nuevoCuit.isEmpty()) {
                         proveedorExistente.setCuit(nuevoCuit);

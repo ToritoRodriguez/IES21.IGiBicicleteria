@@ -21,51 +21,47 @@ public class ListarCategoria extends javax.swing.JFrame {
 
     private JTable categoriaTable;
     private JButton listarButton, backButton;
-    private JComboBox<TipoCategoria> tipoCategoriaComboBox;  // ComboBox para seleccionar el tipo de categoría
-    private JTextField nombreCategoriaField; // Campo para ingresar el nombre de la categoría
+    private JComboBox<TipoCategoria> tipoCategoriaComboBox; 
+    private JTextField nombreCategoriaField; 
 
     public ListarCategoria() {
         setTitle("Listar Categorías");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);  
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Listar Categorías", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de filtro para el nombre de la categoría (opcional) y el tipo
         JPanel filterPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         filterPanel.add(new JLabel("Nombre de la Categoría (Opcional):"));
         nombreCategoriaField = new JTextField();
         filterPanel.add(nombreCategoriaField);
 
-        // ComboBox de tipo de categoría
         filterPanel.add(new JLabel("Tipo de Categoría (Opcional):"));
         tipoCategoriaComboBox = new JComboBox<>();
-        tipoCategoriaComboBox.addItem(null);  // Opción de "Todos" (deseleccionado)
+        tipoCategoriaComboBox.addItem(null);  
         for (TipoCategoria tipo : TipoCategoria.values()) {
-            tipoCategoriaComboBox.addItem(tipo);  // Añadir los valores de tipo de categoría
+            tipoCategoriaComboBox.addItem(tipo);  
         }
         filterPanel.add(tipoCategoriaComboBox);
 
         listarButton = new JButton("Listar");
-        listarButton.addActionListener(new ListarButtonListener());  // Pasamos el campo de nombre al listener
+        listarButton.addActionListener(new ListarButtonListener()); 
         filterPanel.add(listarButton);
 
         add(filterPanel, BorderLayout.NORTH);
 
-        // Tabla para listar las categorías con columnas id, nombre, tipo
+        
         String[] columnNames = {"ID", "Nombre", "Tipo"};
         categoriaTable = new JTable(new Object[0][3], columnNames);
         JScrollPane scrollPane = new JScrollPane(categoriaTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         backButton = new JButton("Volver");
@@ -85,17 +81,14 @@ public class ListarCategoria extends javax.swing.JFrame {
             String nombre = nombreCategoriaField.getText().trim();
             TipoCategoria tipoCategoria = (TipoCategoria) tipoCategoriaComboBox.getSelectedItem();
 
-            // Filtrar según el nombre y tipo de categoría
             actualizarTablaCategorias(nombre, tipoCategoria);
         }
     }
 
     private void actualizarTablaCategorias(String nombreCategoria, TipoCategoria tipoCategoria) {
         CategoriaDaoImpl categoriaDao = new CategoriaDaoImpl();
-        // Usamos el método getCategorias con los filtros correspondientes
         List<Categoria> categorias = categoriaDao.getCategorias(null, nombreCategoria, tipoCategoria);
 
-        // Convertir la lista de categorías a una estructura de datos que la JTable pueda usar
         Object[][] data = new Object[categorias.size()][3];
         for (int i = 0; i < categorias.size(); i++) {
             Categoria categoria = categorias.get(i);
@@ -104,7 +97,6 @@ public class ListarCategoria extends javax.swing.JFrame {
             data[i][2] = categoria.getTipo();
         }
 
-        // Establecer los datos en la tabla
         categoriaTable.setModel(new javax.swing.table.DefaultTableModel(
                 data,
                 new String[]{"ID", "Nombre", "Tipo"}

@@ -20,7 +20,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
     private ConexionDb conexionDb;
 
     @Override
-    // Metodo para insertar
     public void insertarNuevoVendedor(Vendedor vendedor) {
         String codigoVendedor = getProximoCodigoVendedor();
 
@@ -73,9 +72,7 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Método para eliminar vendedor
     public void eliminarVendedor(String codigo, String nombre, String apellido, String sucursal) {
-        // Consulta para obtener el id_persona asociado al vendedor, con filtros opcionales
         String sqlVendedorId = "SELECT id_persona FROM vendedores v "
                 + "INNER JOIN personas p ON p.id = v.id_persona "
                 + "WHERE 1 = 1 ";
@@ -90,17 +87,15 @@ public class VendedorDaoImpl implements IDaoVendedor {
             sqlVendedorId += " AND p.apellido = ?";
         }
         if (sucursal != null && !sucursal.isEmpty()) {
-            sqlVendedorId += " AND s.nombre = ?";  // Suponiendo que 'nombre' es el campo de la sucursal
+            sqlVendedorId += " AND s.nombre = ?"; 
         }
 
-        // Consultas para eliminar el vendedor y la persona asociada
         String sqlDeletePerson = "DELETE FROM personas WHERE id = ?";
         String sqlDeleteVendedor = "DELETE FROM vendedores WHERE codigo = ?";
 
         HashMap<Integer, Object> param = new HashMap<>();
         int paramIndex = 0;
 
-        // Agregar parámetros según los valores no nulos
         if (codigo != null && !codigo.isEmpty()) {
             param.put(paramIndex++, codigo);
         }
@@ -114,23 +109,20 @@ public class VendedorDaoImpl implements IDaoVendedor {
             param.put(paramIndex++, sucursal);
         }
 
-        Integer idPersona = null;  // Variable para almacenar el ID de la persona
+        Integer idPersona = null; 
 
         conexionDb = new ConexionDb();
 
         try {
-            // Ejecutar la consulta para obtener el id_persona
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedorId, param);
             if (rs.next()) {
                 idPersona = rs.getInt("id_persona");
 
-                // Eliminar el vendedor si existe
                 if (idPersona != null) {
                     param.clear();
                     param.put(0, codigo);
                     int rowsDeletedVendedor = conexionDb.ejecutarConsultaUpdate(sqlDeleteVendedor, param);
 
-                    // Si el vendedor fue eliminado, eliminar también la persona asociada
                     if (rowsDeletedVendedor > 0) {
                         param.clear();
                         param.put(0, idPersona);
@@ -156,7 +148,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Metodo para Modificar
     public void modificarVendedor(String codigo, Vendedor vendedor) {
         String sqlUpdateVendedor = "UPDATE vendedores SET cuit = ?, sucursal = ? WHERE codigo = ?";
         conexionDb = new ConexionDb();
@@ -199,7 +190,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Listado de Vendedores
     public List<Vendedor> getVendedores(String codigo, String nombre, String apellido, String sucursal) {
         List<Vendedor> vendedores = new ArrayList<>();
 
@@ -263,7 +253,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar
     public Vendedor obtenerVendedor(String codigo) {
         String sqlVendedor = "SELECT * FROM vendedores v "
                 + "INNER JOIN personas p ON p.id = v.id_persona "
@@ -296,7 +285,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
         return vendedor;
     }
     
-    // Sirve para el manejo de codigos
     public String getProximoCodigoVendedor() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM vendedores";
         conexionDb = new ConexionDb();

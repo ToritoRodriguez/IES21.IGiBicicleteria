@@ -46,7 +46,6 @@ public class ListarVendedor extends javax.swing.JFrame {
 
         add(filterPanel, BorderLayout.NORTH);
 
-        // Tabla para listar los vendedores
         String[] columnNames = {"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"};
         vendedoresTable = new JTable(new DefaultTableModel(new Object[0][8], columnNames));
         JScrollPane scrollPane = new JScrollPane(vendedoresTable);
@@ -106,10 +105,9 @@ public class ListarVendedor extends javax.swing.JFrame {
             super(data, columnNames);
         }
 
-        // Anula el método isCellEditable para que todas las celdas sean no editables
         @Override
         public boolean isCellEditable(int row, int column) {
-            return false;  // Devuelve falso para hacer las celdas no editables
+            return false;  
         }
     }
     

@@ -26,51 +26,42 @@ public class BajaProveedor extends javax.swing.JFrame {
         setTitle("Baja Proveedor");
         setSize(500, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null); 
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Baja Proveedor", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel();
-        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));  // Organizar los componentes verticalmente
-
-        // Campos de búsqueda
+        searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS)); 
         addSearchField(searchPanel, "Código del Proveedor:", codigoField = new JTextField(20));
         addSearchField(searchPanel, "Nombre Fantasía:", nombreFantasiaField = new JTextField(20));
         addSearchField(searchPanel, "Nombre:", nombreField = new JTextField(20));
         addSearchField(searchPanel, "Apellido:", apellidoField = new JTextField(20));
 
-        // Botón Buscar
         JButton buscarButton = new JButton("Buscar");
         buscarButton.addActionListener(new BuscarButtonListener());
         searchPanel.add(buscarButton);
 
-        // Panel para mostrar la información del proveedor en una tabla
         String[] columnNames = {"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
-        proveedorTable = new JTable(new Object[1][8], columnNames);  // Inicialmente vacío
+        proveedorTable = new JTable(new Object[1][8], columnNames); 
         JScrollPane scrollPane = new JScrollPane(proveedorTable);
         searchPanel.add(scrollPane);
 
-        // Configurar tabla
         configurarTabla();
 
-        // Botón Eliminar
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivado inicialmente
+        eliminarButton.setEnabled(false); 
         eliminarButton.addActionListener(new EliminarButtonListener());
         searchPanel.add(eliminarButton);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton backButton = new JButton("Volver");
         backButton.addActionListener(new ActionListener() {
@@ -134,12 +125,12 @@ public class BajaProveedor extends javax.swing.JFrame {
                         };
                     }
                     proveedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 } else {
-                    Object[][] data = new Object[0][8]; // Tabla vacía
+                    Object[][] data = new Object[0][8];
                     proveedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
                     JOptionPane.showMessageDialog(null, "No se encontraron proveedores con esos parámetros.", "Resultado de búsqueda", JOptionPane.INFORMATION_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false); 
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -152,7 +143,6 @@ public class BajaProveedor extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                // Obtener la fila seleccionada de la tabla
                 int selectedRow = proveedorTable.getSelectedRow();
                 String codigo = proveedorTable.getValueAt(selectedRow, 0).toString();
 
@@ -160,26 +150,24 @@ public class BajaProveedor extends javax.swing.JFrame {
                 Proveedor proveedor = proveedorDao.obtenerProveedor(codigo);
 
                 if (proveedor != null) {
-                    // Confirmación de eliminación
                     int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar este proveedor?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
 
                     if (confirmacion == JOptionPane.YES_OPTION) {
                         proveedorDao.eliminarProveedor(codigo, null, null, null);
                         JOptionPane.showMessageDialog(null, "El proveedor ha sido eliminado exitosamente.");
 
-                        // Limpiar la tabla y los campos de búsqueda
                         proveedorTable.setModel(new DefaultTableModel(new Object[0][8], new String[]{"Código", "CUIT", "Nombre Fantasía", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
                         codigoField.setText("");
                         nombreFantasiaField.setText("");
                         nombreField.setText("");
                         apellidoField.setText("");
-                        eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                        eliminarButton.setEnabled(false); 
                     } else {
                         JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Proveedor no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

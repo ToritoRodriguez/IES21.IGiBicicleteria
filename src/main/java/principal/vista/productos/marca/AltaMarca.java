@@ -23,7 +23,6 @@ public class AltaMarca extends javax.swing.JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridLayout(3, 2, 10, 10));
 
-        // Agregamos los componentes del formulario
         add(new JLabel("Nombre de la Marca:"));
         nombreMarcaField = new JTextField();
         add(nombreMarcaField);
@@ -48,28 +47,21 @@ public class AltaMarca extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                // Obtener los datos del formulario
                 String nombreMarca = nombreMarcaField.getText();
 
-                // Validar que el nombre de la marca no esté vacío
                 if (nombreMarca.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "El nombre de la marca no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Crear un objeto Marca
                 Marca marca = new Marca(nombreMarca);
 
-                // Crear una instancia de MarcaDaoImpl
                 MarcaDaoImpl marcaDao = new MarcaDaoImpl();
 
-                // Llamar al método de insertar nueva marca
                 marcaDao.insertarNuevaMarca(marca);
 
-                // Mostrar un mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Marca dada de alta exitosamente");
             } catch (Exception ex) {
-                // Manejo de excepciones
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }

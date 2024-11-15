@@ -7,35 +7,55 @@ package modelo.producto;
 
 public class Categoria {
 
+    private int id;
     private String codigo;
     private String nombre;
-    private int id;
     private String categoria;
     private TipoCategoria tipo;
 
+    // Este constructor se usa en getCategoriasComboBox
     public Categoria(int id, String categoria, TipoCategoria tipo) {
         this.id = id;
         this.categoria = categoria;
         this.tipo = tipo;
     }
-
+    
+    // Este constructor se usa en getCategorias y obtenerCategoria
     public Categoria(String codigo, String nombre, TipoCategoria tipo) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.tipo = tipo;
     }
     
+    // Este constructor se usa en el GUI de AltaCategoria 
     public Categoria(String categoria, TipoCategoria tipo) {
         this.categoria = categoria;
         this.tipo = tipo;
     }
-
+    
+    //Get and Set
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+    
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+    
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getCategoria() {
@@ -56,30 +76,5 @@ public class Categoria {
 
     public int getIdCategoria() {
         return this.id;
-    }
-    
-    @Override
-    public String toString() {
-        return this.getCategoria();  // Devolvemos solo el nombre de la categoría
-    }
-    
-    // Getter para 'codigo'
-    public String getCodigo() {
-        return codigo;
-    }
-
-    // Setter para 'codigo'
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    // Getter para 'nombre'
-    public String getNombre() {
-        return nombre;
-    }
-
-    // Setter para 'nombre'
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
     }
 }

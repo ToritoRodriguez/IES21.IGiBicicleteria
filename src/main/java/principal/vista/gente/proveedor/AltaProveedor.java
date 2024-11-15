@@ -23,7 +23,6 @@ public class AltaProveedor extends javax.swing.JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridLayout(9, 2, 10, 10));
 
-        // Agregamos los componentes del formulario
         add(new JLabel("CUIT:"));
         cuitField = new JTextField();
         add(cuitField);
@@ -52,12 +51,10 @@ public class AltaProveedor extends javax.swing.JFrame {
         emailField = new JTextField();
         add(emailField);
 
-        // Botón para dar de alta al proveedor
         JButton submitButton = new JButton("Dar de alta");
         submitButton.addActionListener(new SubmitButtonListener());
         add(submitButton);
 
-        // Botón para volver al menú principal
         JButton backButton = new JButton("Volver");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -69,7 +66,6 @@ public class AltaProveedor extends javax.swing.JFrame {
         add(backButton);
     }
 
-    // ActionListener para el botón "Dar de alta"
     private class SubmitButtonListener implements ActionListener {
 
         @Override
@@ -83,17 +79,13 @@ public class AltaProveedor extends javax.swing.JFrame {
                 String telefono = telefonoField.getText();
                 String email = emailField.getText();
 
-                // Crear el objeto Proveedor
                 Proveedor proveedor = new Proveedor(cuit, nombreFantasia, nombre, apellido, String.valueOf(dni), telefono, email);
 
-                // Llamar al método para insertar el proveedor
                 ProveedorDaoImpl ProveedorDao = new ProveedorDaoImpl();
                 ProveedorDao.insertarNuevoProveedor(proveedor);
 
-                // Mostrar mensaje de éxito
                 JOptionPane.showMessageDialog(null, "Proveedor dado de alta exitosamente.");
             } catch (Exception ex) {
-                // Mostrar mensaje de error si ocurre alguna excepción
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }

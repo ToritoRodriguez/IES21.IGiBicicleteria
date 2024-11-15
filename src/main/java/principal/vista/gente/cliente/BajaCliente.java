@@ -181,7 +181,6 @@ public class BajaCliente extends javax.swing.JFrame {
                             clienteDao.eliminarCliente(codigo, null, null);
                             JOptionPane.showMessageDialog(null, "El cliente ha sido eliminado exitosamente.");
 
-                            // Limpiar la tabla
                             clienteTable.setModel(new DefaultTableModel(
                                     new Object[0][7], new String[]{"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
                             ));

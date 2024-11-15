@@ -169,7 +169,6 @@ public class EditarVendedor extends javax.swing.JFrame {
                 Vendedor vendedorExistente = vendedorDao.obtenerVendedor(codigo);
 
                 if (vendedorExistente != null) {
-                    // Obtener y actualizar los campos
                     String nuevoCuit = (String) vendedorTable.getValueAt(0, 1); 
                     if (!nuevoCuit.isEmpty()) {
                         vendedorExistente.setCuit(nuevoCuit);

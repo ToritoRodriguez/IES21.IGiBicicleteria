@@ -170,23 +170,17 @@ public class EditarCliente extends javax.swing.JFrame {
                     clienteTable.repaint();
 
                     String nuevoCuil = (String) clienteTable.getValueAt(0, 1);
-                    System.out.println("Nuevo CUIL: " + nuevoCuil);
 
                     String nuevoNombre = (String) clienteTable.getValueAt(1, 1);
-                    System.out.println("Nuevo Nombre: " + nuevoNombre);
 
                     String nuevoApellido = (String) clienteTable.getValueAt(2, 1);
-                    System.out.println("Nuevo Apellido: " + nuevoApellido);
 
                     String nuevoDni = (String) clienteTable.getValueAt(3, 1);
-                    System.out.println("Nuevo DNI: " + nuevoDni);
 
                     String nuevoTelefono = (String) clienteTable.getValueAt(4, 1);
-                    System.out.println("Nuevo Teléfono: " + nuevoTelefono);
 
                     clienteTable.getCellEditor().stopCellEditing();
                     String nuevoEmail = (String) clienteTable.getValueAt(5, 1);
-                    System.out.println("Nuevo Email después de edición: " + nuevoEmail);
 
                     if (!nuevoCuil.isEmpty()) {
                         clienteExistente.setCuil(nuevoCuil);

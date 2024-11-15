@@ -37,7 +37,6 @@ public class BajaCategoria extends javax.swing.JFrame {
 
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
-        // Panel de búsqueda
         JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
 
         inputPanel.add(new JLabel("Código:"));
@@ -54,9 +53,8 @@ public class BajaCategoria extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Tabla de categorías
         String[] columnNames = {"Código", "Nombre", "Tipo"};
-        Object[][] data = new Object[0][3];  // Tabla vacía por defecto
+        Object[][] data = new Object[0][3];  
         categoriaTable = new JTable(data, columnNames);
         configurarTabla();
         JScrollPane scrollPane = new JScrollPane(categoriaTable);
@@ -65,7 +63,7 @@ public class BajaCategoria extends javax.swing.JFrame {
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivado hasta que se seleccione una fila
+        eliminarButton.setEnabled(false);  
         eliminarButton.addActionListener(new EliminarButtonListener());
         searchPanel.add(eliminarButton, BorderLayout.SOUTH);
 
@@ -123,12 +121,12 @@ public class BajaCategoria extends javax.swing.JFrame {
                         };
                     }
                     categoriaTable.setModel(new DefaultTableModel(data, new String[]{"Código", "Nombre", "Tipo"}));
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 } else {
-                    Object[][] data = new Object[0][3]; // Tabla vacía
+                    Object[][] data = new Object[0][3]; 
                     categoriaTable.setModel(new DefaultTableModel(data, new String[]{"Código", "Nombre", "Tipo"}));
                     JOptionPane.showMessageDialog(null, "No se encontraron categorías con esos parámetros.", "Resultado de búsqueda", JOptionPane.INFORMATION_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -154,17 +152,16 @@ public class BajaCategoria extends javax.swing.JFrame {
                         categoriaDao.eliminarCategoria(codigo, null, null);
                         JOptionPane.showMessageDialog(null, "La categoría ha sido eliminada exitosamente.");
 
-                        // Limpiar la tabla y los campos de búsqueda
                         categoriaTable.setModel(new DefaultTableModel(new Object[0][3], new String[]{"Código", "Nombre", "Tipo"}));
                         nombreField.setText("");
                         codigoField.setText("");
-                        eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                        eliminarButton.setEnabled(false); 
                     } else {
                         JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
                     }
                 } else {
                     JOptionPane.showMessageDialog(null, "Categoría no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false); 
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

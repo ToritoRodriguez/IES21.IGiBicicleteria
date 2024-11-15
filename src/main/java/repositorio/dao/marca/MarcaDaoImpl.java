@@ -23,17 +23,16 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
     
     @Override
-    // Metodo para insertar
     public void insertarNuevaMarca(Marca marca) {
         String nombreMarca = marca.getMarca();
-        String codigoMarca = getProximoCodigoMarca();  // Obtener el próximo código para la marca
+        String codigoMarca = getProximoCodigoMarca();  
 
         String sqlInsertMarca = "INSERT INTO marcas (codigo, marca) VALUES (?, ?)";
 
         try (PreparedStatement stmtMarca = conexionDb.obtenerConexion().prepareStatement(sqlInsertMarca)) {
-            stmtMarca.setString(1, codigoMarca);  // Asignar el código a la marca
-            stmtMarca.setString(2, nombreMarca);  // Asignar el nombre a la marca
-
+            stmtMarca.setString(1, codigoMarca);  
+            stmtMarca.setString(2, nombreMarca);  
+            
             int affectedRows = stmtMarca.executeUpdate();
             if (affectedRows > 0) {
                 System.out.println("Marca " + nombreMarca + " insertada con éxito.");
@@ -46,12 +45,9 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
-    // Método para eliminar una marca
     public void eliminarMarca(String codigo, String nombre) {
-        // Consulta para obtener el id de la marca con filtros opcionales
         String sqlMarcaId = "SELECT id FROM marcas WHERE 1 = 1";
 
-        // Agregar condiciones según los valores no nulos
         if (codigo != null && !codigo.isEmpty()) {
             sqlMarcaId += " AND codigo = ?";
         }
@@ -59,13 +55,11 @@ public class MarcaDaoImpl implements IDaoMarca {
             sqlMarcaId += " AND marca = ?";
         }
 
-        // Consulta para eliminar la marca por id
         String sqlDeleteMarca = "DELETE FROM marcas WHERE id = ?";
 
         HashMap<Integer, Object> param = new HashMap<>();
         int paramIndex = 0;
 
-        // Agregar parámetros según los valores no nulos
         if (codigo != null && !codigo.isEmpty()) {
             param.put(paramIndex++, codigo);
         }
@@ -73,23 +67,21 @@ public class MarcaDaoImpl implements IDaoMarca {
             param.put(paramIndex++, nombre);
         }
 
-        Integer idMarca = null;  // Variable para almacenar el ID de la marca
+        Integer idMarca = null; 
 
         conexionDb = new ConexionDb();
 
         try {
-            // Ejecutar la consulta para obtener el id de la marca
+
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlMarcaId, param);
             if (rs.next()) {
                 idMarca = rs.getInt("id");
 
-                // Eliminar la marca si existe
                 if (idMarca != null) {
                     param.clear();
                     param.put(0, idMarca);
                     int rowsDeletedMarca = conexionDb.ejecutarConsultaUpdate(sqlDeleteMarca, param);
 
-                    // Si la marca fue eliminada
                     if (rowsDeletedMarca > 0) {
                         System.out.println("Marca eliminada exitosamente.");
                     } else {
@@ -107,13 +99,12 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
-    // Metodo para Modificar
     public void modificarMarca(String codigoMarca, Marca marcaModificada) {
         String sqlUpdateMarca = "UPDATE marcas SET marca = ? WHERE codigo = ?";
 
         try (PreparedStatement stmtUpdate = conexionDb.obtenerConexion().prepareStatement(sqlUpdateMarca)) {
             stmtUpdate.setString(1, marcaModificada.getMarca());
-            stmtUpdate.setString(2, codigoMarca);  // Cambiar a String para usar el código
+            stmtUpdate.setString(2, codigoMarca);  
 
             int affectedRows = stmtUpdate.executeUpdate();
             if (affectedRows > 0) {
@@ -127,7 +118,6 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
-    // Listado de Marcas
     public List<Marca> getMarcas(String codigoMarca, String nombreMarca) {
         List<Marca> marcas = new ArrayList<>();
         StringBuilder sqlQuery = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
@@ -135,13 +125,11 @@ public class MarcaDaoImpl implements IDaoMarca {
         HashMap<Integer, Object> param = new HashMap<>();
         int index = 0;
 
-        // Filtrar por código de la marca si se proporciona
         if (codigoMarca != null && !codigoMarca.isEmpty()) {
             sqlQuery.append(" AND codigo = ?");
             param.put(index++, codigoMarca);
         }
 
-        // Filtrar por nombre de la marca si se proporciona
         if (nombreMarca != null && !nombreMarca.isEmpty()) {
             sqlQuery.append(" AND marca LIKE ?");
             param.put(index++, "%" + nombreMarca + "%");
@@ -167,17 +155,14 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
     
     @Override
-    // Sirve para la Baja y Modificacion - Lo usamos para buscar
     public Marca obtenerMarca(String codigoMarca, String nombreMarca) {
         Marca marca = null;
         StringBuilder sql = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
 
-        // Agregar filtro por código de la marca si se proporciona
         if (codigoMarca != null && !codigoMarca.isEmpty()) {
             sql.append(" AND codigo = ?");
         }
 
-        // Agregar filtro por nombre de la marca si se proporciona
         if (nombreMarca != null && !nombreMarca.isEmpty()) {
             sql.append(" AND marca = ?");
         }
@@ -185,7 +170,6 @@ public class MarcaDaoImpl implements IDaoMarca {
         try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql.toString())) {
             int paramIndex = 1;
 
-            // Establecer los parámetros
             if (codigoMarca != null && !codigoMarca.isEmpty()) {
                 stmt.setString(paramIndex++, codigoMarca);
             }
@@ -196,14 +180,12 @@ public class MarcaDaoImpl implements IDaoMarca {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                // Obtener el nombre de la marca
+                
                 String nombre = rs.getString("marca");
 
-                // Crear la marca
                 marca = new Marca(nombre);
-                marca.setCodigo(rs.getString("codigo"));  // Asignar el código de la marca
+                marca.setCodigo(rs.getString("codigo"));
 
-                // Inicializar la lista de modelos
                 marca.setModelos(new ArrayList<>());
             } else {
                 System.out.println("No se encontró una marca con los parámetros proporcionados.");
@@ -215,20 +197,19 @@ public class MarcaDaoImpl implements IDaoMarca {
         return marca;
     }
     
-    // Sirve para el manejo de codigos
     public String getProximoCodigoMarca() {
-        String sqlNextCode = "SELECT MAX(id) AS total FROM marcas";  // Consulta para obtener el máximo id
+        String sqlNextCode = "SELECT MAX(id) AS total FROM marcas"; 
         conexionDb = new ConexionDb();
 
         try {
-            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlNextCode);  // Ejecutar la consulta
+            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlNextCode); 
             if (rs.next()) {
-                return "M-" + (rs.getInt("total") + 1);  // Retorna el próximo código de marca
+                return "M-" + (rs.getInt("total") + 1);  
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener el próximo código de marca: " + e.getMessage());
         }
 
-        return "M-1";  // Si no se encuentra ningún código, asigna "M-1" como código inicial
+        return "M-1"; 
     }
 }
