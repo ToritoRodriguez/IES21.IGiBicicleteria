@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.table.AbstractTableModel;
 import principal.vista.gente.HomeMenuGente;
 import repositorio.dao.vendedor.VendedorDaoImpl;
 import modelo.vendedor.Vendedor;
@@ -18,22 +19,20 @@ public class EditarVendedor extends javax.swing.JFrame {
     private JTextField codigoField;
     private JTable vendedorTable;
     private JButton buscarButton, modificarButton;
-    
+
     public EditarVendedor() {
         setTitle("Modificar Vendedor");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);  
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Modificar Vendedor", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -47,7 +46,6 @@ public class EditarVendedor extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información del vendedor en una tabla
         String[] columnNames = {"Campo", "Valor"};
         Object[][] data = {
             {"CUIT", ""},
@@ -58,18 +56,18 @@ public class EditarVendedor extends javax.swing.JFrame {
             {"Email", ""},
             {"Sucursal", ""}
         };
-        vendedorTable = new JTable(data, columnNames);
+
+        vendedorTable = new JTable(new VendedorTableModel(data, columnNames));
         JScrollPane scrollPane = new JScrollPane(vendedorTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         modificarButton = new JButton("Guardar Cambios");
-        modificarButton.setEnabled(false);  // Desactivar inicialmente
+        modificarButton.setEnabled(false); 
         modificarButton.addActionListener(new ModificarButtonListener());
         searchPanel.add(modificarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         JButton backButton = new JButton("Volver");
@@ -85,6 +83,50 @@ public class EditarVendedor extends javax.swing.JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    private class VendedorTableModel extends AbstractTableModel {
+
+        private Object[][] data;
+        private String[] columnNames;
+
+        public VendedorTableModel(Object[][] data, String[] columnNames) {
+            this.data = data;
+            this.columnNames = columnNames;
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.length;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+            return columnNames[columnIndex];
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            return data[rowIndex][columnIndex];
+        }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return columnIndex == 1;  
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            if (isCellEditable(rowIndex, columnIndex)) {
+                data[rowIndex][columnIndex] = aValue;
+                fireTableCellUpdated(rowIndex, columnIndex);
+            }
+        }
+    }
+
     private class BuscarButtonListener implements ActionListener {
 
         @Override
@@ -92,10 +134,8 @@ public class EditarVendedor extends javax.swing.JFrame {
             try {
                 String codigo = codigoField.getText();
 
-                // Crear una instancia del VendedorDaoImpl
                 VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
 
-                // Llamar al método obtenerVendedor usando la instancia
                 Vendedor vendedor = vendedorDao.obtenerVendedor(codigo);
 
                 if (vendedor != null) {
@@ -106,10 +146,10 @@ public class EditarVendedor extends javax.swing.JFrame {
                     vendedorTable.setValueAt(vendedor.getTelefono(), 4, 1);
                     vendedorTable.setValueAt(vendedor.getEmail(), 5, 1);
                     vendedorTable.setValueAt(vendedor.getSucursal(), 6, 1);
-                    modificarButton.setEnabled(true);  // Activar el botón modificar
+                    modificarButton.setEnabled(true);  
                 } else {
                     JOptionPane.showMessageDialog(null, "Vendedor no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
-                    modificarButton.setEnabled(false);  // Desactivar el botón modificar
+                    modificarButton.setEnabled(false); 
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -130,43 +170,42 @@ public class EditarVendedor extends javax.swing.JFrame {
 
                 if (vendedorExistente != null) {
                     // Obtener y actualizar los campos
-                    String nuevoCuit = (String) vendedorTable.getValueAt(0, 1); // Obtener Cuit
+                    String nuevoCuit = (String) vendedorTable.getValueAt(0, 1); 
                     if (!nuevoCuit.isEmpty()) {
                         vendedorExistente.setCuit(nuevoCuit);
                     }
 
-                    String nuevoNombre = (String) vendedorTable.getValueAt(1, 1); // Obtener Nombre
+                    String nuevoNombre = (String) vendedorTable.getValueAt(1, 1); 
                     if (!nuevoNombre.isEmpty()) {
                         vendedorExistente.setNombre(nuevoNombre);
                     }
 
-                    String nuevoApellido = (String) vendedorTable.getValueAt(2, 1); // Obtener Apellido
+                    String nuevoApellido = (String) vendedorTable.getValueAt(2, 1); 
                     if (!nuevoApellido.isEmpty()) {
                         vendedorExistente.setApellido(nuevoApellido);
                     }
 
-                    String nuevoDni = (String) vendedorTable.getValueAt(3, 1); // Obtener DNI
+                    String nuevoDni = (String) vendedorTable.getValueAt(3, 1);
                     if (!nuevoDni.isEmpty()) {
                         vendedorExistente.setDni(nuevoDni);
                     }
 
-                    String nuevoTelefono = (String) vendedorTable.getValueAt(4, 1); // Obtener Teléfono
+                    String nuevoTelefono = (String) vendedorTable.getValueAt(4, 1); 
                     if (!nuevoTelefono.isEmpty()) {
                         vendedorExistente.setTelefono(nuevoTelefono);
                     }
 
-                    String nuevoEmail = (String) vendedorTable.getValueAt(5, 1); // Obtener Email
+                    String nuevoEmail = (String) vendedorTable.getValueAt(5, 1); 
                     if (!nuevoEmail.isEmpty()) {
                         vendedorExistente.setEmail(nuevoEmail);
                     }
 
-                    vendedorTable.getCellEditor().stopCellEditing();  
-                    String nuevaSucursal = (String) vendedorTable.getValueAt(6, 1); // Obtener Sucursal
+                    vendedorTable.getCellEditor().stopCellEditing();
+                    String nuevaSucursal = (String) vendedorTable.getValueAt(6, 1);
                     if (!nuevaSucursal.isEmpty()) {
                         vendedorExistente.setSucursal(nuevaSucursal);
                     }
 
-                    // Modificar el vendedor en la base de datos
                     vendedorDao.modificarVendedor(codigo, vendedorExistente);
                     JOptionPane.showMessageDialog(null, "Vendedor modificado con éxito.");
                 } else {

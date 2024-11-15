@@ -25,17 +25,15 @@ public class ListarClientes extends javax.swing.JFrame {
         setTitle("Listar Clientes");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);  
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Listar Clientes", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de filtro para nombre y apellido
         JPanel filterPanel = new JPanel(new GridLayout(1, 5, 10, 10));
         filterPanel.add(new JLabel("Nombre:"));
         nombreField = new JTextField();
@@ -50,13 +48,11 @@ public class ListarClientes extends javax.swing.JFrame {
 
         add(filterPanel, BorderLayout.NORTH);
 
-        // Tabla para listar los clientes
         String[] columnNames = {"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
         clientesTable = new JTable(new DefaultTableModel(new Object[0][7], columnNames));
         JScrollPane scrollPane = new JScrollPane(clientesTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         backButton = new JButton("Volver");
@@ -76,11 +72,6 @@ public class ListarClientes extends javax.swing.JFrame {
             String nombre = nombreField.getText().trim();
             String apellido = apellidoField.getText().trim();
 
-            // Imprimir valores de los campos de texto para depuración
-            //System.out.println("Nombre ingresado: " + nombre);
-            //System.out.println("Apellido ingresado: " + apellido);
-
-            // Llamar a actualizarTablaClientes con los filtros adecuados
             actualizarTablaClientes(nombre.isEmpty() ? null : nombre, apellido.isEmpty() ? null : apellido);
         }
     }
@@ -88,17 +79,8 @@ public class ListarClientes extends javax.swing.JFrame {
     private void actualizarTablaClientes(String nombre, String apellido) {
         ClienteDaoImpl clienteDao = new ClienteDaoImpl();
 
-        // Imprimir filtros usados para la búsqueda
-        //System.out.println("Ejecutando búsqueda con filtros:");
-        //System.out.println("Nombre: " + nombre);
-        //System.out.println("Apellido: " + apellido);
-
         List<Cliente> clientes = clienteDao.getClientes(null, nombre, apellido);
 
-        // Imprimir el número de clientes encontrados
-        //System.out.println("Número de clientes encontrados: " + clientes.size());
-
-        // Convertir la lista de clientes a una estructura de datos que la JTable pueda usar
         Object[][] data = new Object[clientes.size()][7];
         for (int i = 0; i < clientes.size(); i++) {
             Cliente cliente = clientes.get(i);
@@ -109,12 +91,8 @@ public class ListarClientes extends javax.swing.JFrame {
             data[i][4] = cliente.getDni();
             data[i][5] = cliente.getTelefono();
             data[i][6] = cliente.getEmail();
-
-            // Imprimir cada cliente para depuración
-            //System.out.println("Cliente " + (i + 1) + ": " + cliente);
         }
 
-        // Actualizar el modelo de la tabla con los nuevos datos
         clientesTable.setModel(new DefaultTableModel(
                 data,
                 new String[]{"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}

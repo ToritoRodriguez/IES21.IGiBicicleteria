@@ -19,17 +19,22 @@ public class VendedorDaoImpl implements IDaoVendedor {
 
     private ConexionDb conexionDb;
 
-    private static final String SQL_INSERT_PERSONA = "INSERT INTO personas (nombre, apellido, dni, email, telefono) VALUES (?, ?, ?, ?, ?)";
-    private static final String SQL_INSERT_VENDEDOR = "INSERT INTO vendedores (id_persona, codigo, sucursal, cuit) VALUES (?, ?, ?, ?)";
-
     @Override
     // Metodo para insertar
     public void insertarNuevoVendedor(Vendedor vendedor) {
         String codigoVendedor = getProximoCodigoVendedor();
 
+        String sqlPersona = "INSERT INTO personas (nombre, apellido, dni, email, telefono) VALUES (?, ?, ?, ?, ?)";
+        HashMap<Integer, Object> paramPersona = new HashMap<>();
+        paramPersona.put(1, vendedor.getNombre());
+        paramPersona.put(2, vendedor.getApellido());
+        paramPersona.put(3, vendedor.getDni());
+        paramPersona.put(4, vendedor.getEmail());
+        paramPersona.put(5, vendedor.getTelefono());
+        
         conexionDb = new ConexionDb();
         try {
-            PreparedStatement stmtPersona = conexionDb.obtenerConexion().prepareStatement(SQL_INSERT_PERSONA, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement stmtPersona = conexionDb.obtenerConexion().prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS);
             stmtPersona.setString(1, vendedor.getNombre());
             stmtPersona.setString(2, vendedor.getApellido());
             stmtPersona.setString(3, vendedor.getDni());
@@ -43,7 +48,9 @@ public class VendedorDaoImpl implements IDaoVendedor {
                 if (generatedKeysPersona.next()) {
                     int personId = generatedKeysPersona.getInt(1);
 
-                    PreparedStatement stmtVendedor = conexionDb.obtenerConexion().prepareStatement(SQL_INSERT_VENDEDOR);
+                    String sqlVendedor = "INSERT INTO vendedores (id_persona, codigo, sucursal, cuit) VALUES (?, ?, ?, ?)";
+                    
+                    PreparedStatement stmtVendedor = conexionDb.obtenerConexion().prepareStatement(sqlVendedor);
                     stmtVendedor.setInt(1, personId);
                     stmtVendedor.setString(2, codigoVendedor);
                     stmtVendedor.setString(3, vendedor.getSucursal());
@@ -66,37 +73,88 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Metodo para Eliminar
-    public void eliminarVendedor(String codigo) {
-        String sqlVendedorId = "SELECT id_persona FROM vendedores WHERE codigo = ?";
+    // Método para eliminar vendedor
+    public void eliminarVendedor(String codigo, String nombre, String apellido, String sucursal) {
+        // Consulta para obtener el id_persona asociado al vendedor, con filtros opcionales
+        String sqlVendedorId = "SELECT id_persona FROM vendedores v "
+                + "INNER JOIN personas p ON p.id = v.id_persona "
+                + "WHERE 1 = 1 ";
+
+        if (codigo != null && !codigo.isEmpty()) {
+            sqlVendedorId += " AND v.codigo = ?";
+        }
+        if (nombre != null && !nombre.isEmpty()) {
+            sqlVendedorId += " AND p.nombre = ?";
+        }
+        if (apellido != null && !apellido.isEmpty()) {
+            sqlVendedorId += " AND p.apellido = ?";
+        }
+        if (sucursal != null && !sucursal.isEmpty()) {
+            sqlVendedorId += " AND s.nombre = ?";  // Suponiendo que 'nombre' es el campo de la sucursal
+        }
+
+        // Consultas para eliminar el vendedor y la persona asociada
         String sqlDeletePerson = "DELETE FROM personas WHERE id = ?";
         String sqlDeleteVendedor = "DELETE FROM vendedores WHERE codigo = ?";
+
+        HashMap<Integer, Object> param = new HashMap<>();
+        int paramIndex = 0;
+
+        // Agregar parámetros según los valores no nulos
+        if (codigo != null && !codigo.isEmpty()) {
+            param.put(paramIndex++, codigo);
+        }
+        if (nombre != null && !nombre.isEmpty()) {
+            param.put(paramIndex++, nombre);
+        }
+        if (apellido != null && !apellido.isEmpty()) {
+            param.put(paramIndex++, apellido);
+        }
+        if (sucursal != null && !sucursal.isEmpty()) {
+            param.put(paramIndex++, sucursal);
+        }
+
+        Integer idPersona = null;  // Variable para almacenar el ID de la persona
+
         conexionDb = new ConexionDb();
 
         try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, codigo);
-
+            // Ejecutar la consulta para obtener el id_persona
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedorId, param);
             if (rs.next()) {
-                int personId = rs.getInt("id_persona");
+                idPersona = rs.getInt("id_persona");
 
-                param.clear();
-                param.put(0, codigo);  
-                conexionDb.ejecutarConsultaUpdate(sqlDeleteVendedor, param);
+                // Eliminar el vendedor si existe
+                if (idPersona != null) {
+                    param.clear();
+                    param.put(0, codigo);
+                    int rowsDeletedVendedor = conexionDb.ejecutarConsultaUpdate(sqlDeleteVendedor, param);
 
-                param.clear();
-                param.put(0, personId);  
-                conexionDb.ejecutarConsultaUpdate(sqlDeletePerson, param);
+                    // Si el vendedor fue eliminado, eliminar también la persona asociada
+                    if (rowsDeletedVendedor > 0) {
+                        param.clear();
+                        param.put(0, idPersona);
+                        int rowsDeletedPerson = conexionDb.ejecutarConsultaUpdate(sqlDeletePerson, param);
 
-                System.out.println("El vendedor se eliminó exitosamente.");
+                        if (rowsDeletedPerson > 0) {
+                            System.out.println("El vendedor se eliminó exitosamente.");
+                        } else {
+                            System.out.println("No se pudo eliminar la persona asociada al vendedor.");
+                        }
+                    } else {
+                        System.out.println("No se encontró el vendedor con los datos proporcionados.");
+                    }
+                } else {
+                    System.out.println("Vendedor no encontrado, no se pudo eliminar.");
+                }
             } else {
-                System.out.println("Vendedor no encontrado.");
+                System.out.println("No se encontró el vendedor con los datos proporcionados.");
             }
         } catch (SQLException e) {
             System.out.println("Error al eliminar el vendedor: " + e.getMessage());
         }
     }
+
 
     @Override
     // Metodo para Modificar
@@ -177,15 +235,14 @@ public class VendedorDaoImpl implements IDaoVendedor {
 
     @Override
     // Listado de Vendedores
-    public List<Vendedor> getVendedores(String codigo, String nombre, String apellido) {
+    public List<Vendedor> getVendedores(String codigo, String nombre, String apellido, String sucursal) {
         List<Vendedor> vendedores = new ArrayList<>();
 
         String sqlVendedores = "SELECT v.codigo, p.nombre, p.apellido, p.dni, p.telefono, p.email, v.cuit, v.sucursal "
                 + "FROM vendedores v "
                 + "INNER JOIN personas p ON p.id = v.id_persona "
-                + "WHERE 1 = 1";
+                + "WHERE 1 = 1"; 
 
-        // Construcción dinámica de la consulta SQL según los parámetros de búsqueda.
         if (codigo != null && !codigo.isEmpty()) {
             sqlVendedores += " AND v.codigo = ?";
         }
@@ -195,14 +252,16 @@ public class VendedorDaoImpl implements IDaoVendedor {
         if (apellido != null && !apellido.isEmpty()) {
             sqlVendedores += " AND p.apellido = ?";
         }
+        if (sucursal != null && !sucursal.isEmpty()) {
+            sqlVendedores += " AND v.sucursal = ?";  
+        }
 
         conexionDb = new ConexionDb();
 
         try {
             HashMap<Integer, Object> param = new HashMap<>();
-            int index = 1;
+            int index = 0;
 
-            // Agregar los parámetros de la consulta según los filtros proporcionados.
             if (codigo != null && !codigo.isEmpty()) {
                 param.put(index++, codigo);
             }
@@ -212,11 +271,12 @@ public class VendedorDaoImpl implements IDaoVendedor {
             if (apellido != null && !apellido.isEmpty()) {
                 param.put(index++, apellido);
             }
+            if (sucursal != null && !sucursal.isEmpty()) {
+                param.put(index++, sucursal); 
+            }
 
-            // Ejecutar la consulta con los parámetros especificados.
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedores, param);
 
-            // Procesar los resultados de la consulta.
             while (rs.next()) {
                 Vendedor vendedor = new Vendedor(
                         rs.getString("cuit"),
@@ -238,126 +298,6 @@ public class VendedorDaoImpl implements IDaoVendedor {
     }
 
     @Override
-    // Listado de Vendedores filtrados por nombre
-    public List<Vendedor> getVendedoresPorNombre(String nombre) {
-        List<Vendedor> vendedores = new ArrayList<>();
-
-        String sqlVendedores = "SELECT v.codigo, p.nombre, p.apellido, p.dni, p.telefono, p.email, v.cuit, v.sucursal "
-                + "FROM vendedores v "
-                + "INNER JOIN personas p ON p.id = v.id_persona "
-                + "WHERE p.nombre = ?";  // Filtramos solo por nombre
-
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, nombre);  // Asignamos el parámetro a la posición 1
-
-            // Ejecutar la consulta con el parámetro correspondiente
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedores, param);
-
-            // Procesar los resultados de la consulta
-            while (rs.next()) {
-                Vendedor vendedor = new Vendedor(
-                        rs.getString("cuit"),
-                        rs.getString("sucursal"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                vendedor.setCodigo(rs.getString("codigo"));
-                vendedores.add(vendedor);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de vendedores por nombre: " + e.getMessage());
-        }
-
-        return vendedores;
-    }
-
-    @Override
-    // Listado de Vendedores filtrados por apellido
-    public List<Vendedor> getVendedoresPorApellido(String apellido) {
-        List<Vendedor> vendedores = new ArrayList<>();
-
-        String sqlVendedores = "SELECT v.codigo, p.nombre, p.apellido, p.dni, p.telefono, p.email, v.cuit, v.sucursal "
-                + "FROM vendedores v "
-                + "INNER JOIN personas p ON p.id = v.id_persona "
-                + "WHERE p.apellido = ?";  // Filtramos solo por apellido
-
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, apellido);  // Asignamos el parámetro a la posición 1
-
-            // Ejecutar la consulta con el parámetro correspondiente
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedores, param);
-
-            // Procesar los resultados de la consulta
-            while (rs.next()) {
-                Vendedor vendedor = new Vendedor(
-                        rs.getString("cuit"),
-                        rs.getString("sucursal"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                vendedor.setCodigo(rs.getString("codigo"));
-                vendedores.add(vendedor);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de vendedores por apellido: " + e.getMessage());
-        }
-
-        return vendedores;
-    }
-
-    @Override
-    // Listado de Vendedores filtrados por sucursal
-    public List<Vendedor> getVendedoresPorSucursal(String sucursal) {
-        List<Vendedor> vendedores = new ArrayList<>();
-
-        String sqlVendedores = "SELECT v.codigo, p.nombre, p.apellido, p.dni, p.telefono, p.email, v.cuit, v.sucursal "
-                + "FROM vendedores v "
-                + "INNER JOIN personas p ON p.id = v.id_persona "
-                + "WHERE v.sucursal = ?";  // Filtramos solo por sucursal
-
-        conexionDb = new ConexionDb();
-
-        try {
-            HashMap<Integer, Object> param = new HashMap<>();
-            param.put(0, sucursal);  // Asignamos el parámetro a la posición 1
-
-            // Ejecutar la consulta con el parámetro correspondiente
-            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlVendedores, param);
-
-            // Procesar los resultados de la consulta
-            while (rs.next()) {
-                Vendedor vendedor = new Vendedor(
-                        rs.getString("cuit"),
-                        rs.getString("sucursal"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("telefono"),
-                        rs.getString("email")
-                );
-                vendedor.setCodigo(rs.getString("codigo"));
-                vendedores.add(vendedor);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de vendedores por sucursal: " + e.getMessage());
-        }
-
-        return vendedores;
-    }
-    
-    @Override
     // Sirve para el manejo de codigos
     public String getProximoCodigoVendedor() {
         String sqlNextCode = "SELECT MAX(id) AS total FROM vendedores";
@@ -378,12 +318,10 @@ public class VendedorDaoImpl implements IDaoVendedor {
     // Sirve para Pedidos
     public Vendedor obtenerVendedorPorId(int idVendedor) {
         Vendedor vendedor = null;
-        // Consulta con JOIN entre vendedores y personas
         String sql = "SELECT v.id, v.cuit, v.sucursal, p.nombre, p.apellido, p.dni, p.telefono, p.email "
                 + "FROM vendedores v "
                 + "INNER JOIN personas p ON v.id_persona = p.id "
-                + // Asumiendo que id_persona es la clave foránea en vendedores
-                "WHERE v.id = ?"; // Consulta para obtener vendedor por ID
+                + "WHERE v.id = ?"; 
 
         conexionDb = new ConexionDb();
         try {
@@ -392,11 +330,10 @@ public class VendedorDaoImpl implements IDaoVendedor {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                // Creación del objeto Vendedor utilizando los datos traídos de ambas tablas
                 vendedor = new Vendedor(
                         rs.getString("cuit"),
                         rs.getString("sucursal"),
-                        rs.getString("nombre"), // Nombre tomado desde la tabla personas
+                        rs.getString("nombre"), 
                         rs.getString("apellido"),
                         rs.getString("dni"),
                         rs.getString("telefono"),

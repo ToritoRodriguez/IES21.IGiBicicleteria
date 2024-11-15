@@ -4,9 +4,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.table.DefaultTableModel;
 import principal.vista.gente.HomeMenuGente;
 import repositorio.dao.vendedor.VendedorDaoImpl;
 import modelo.vendedor.Vendedor;
+import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
@@ -15,55 +21,67 @@ import modelo.vendedor.Vendedor;
 
 public class BajaVendedor extends javax.swing.JFrame {
 
-    private JTextField codigoField;
+    private JTextField nombreField, apellidoField, sucursalField, codigoField;
     private JTable vendedorTable;
     private JButton eliminarButton;
-    
+
     public BajaVendedor() {
         setTitle("Baja Vendedor");
-        setSize(500, 300);
+        setSize(600, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Baja Vendedor", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
-        JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
-        inputPanel.add(new JLabel("Código del Vendedor:"), BorderLayout.WEST);
+        // Panel de búsqueda
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));  // Cambié a GridLayout(5, 2)
+
+        inputPanel.add(new JLabel("Código:"));
         codigoField = new JTextField();
-        inputPanel.add(codigoField, BorderLayout.CENTER);
+        inputPanel.add(codigoField);
+
+        inputPanel.add(new JLabel("Nombre:"));
+        nombreField = new JTextField();
+        inputPanel.add(nombreField);
+
+        inputPanel.add(new JLabel("Apellido:"));
+        apellidoField = new JTextField();
+        inputPanel.add(apellidoField);
+
+        inputPanel.add(new JLabel("Sucursal:"));
+        sucursalField = new JTextField();
+        inputPanel.add(sucursalField);
 
         JButton buscarButton = new JButton("Buscar");
         buscarButton.addActionListener(new BuscarButtonListener());
-        inputPanel.add(buscarButton, BorderLayout.EAST);
+        inputPanel.add(buscarButton);  // Se añade al final del GridLayout
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información del vendedor en una tabla
-        String[] columnNames = {"CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
-        Object[][] data = new Object[1][7]; // Inicialmente vacío
+        // Tabla de vendedores
+        String[] columnNames = {"Código", "CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
+        Object[][] data = new Object[0][8];  // Tabla vacía por defecto
         vendedorTable = new JTable(data, columnNames);
+        configurarTabla();
         JScrollPane scrollPane = new JScrollPane(vendedorTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivar inicialmente
+        eliminarButton.setEnabled(false);  // Desactivado hasta que se seleccione una fila
         eliminarButton.addActionListener(new EliminarButtonListener());
         searchPanel.add(eliminarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         JButton backButton = new JButton("Volver");
@@ -79,32 +97,50 @@ public class BajaVendedor extends javax.swing.JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    private void configurarTabla() {
+        vendedorTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        vendedorTable.setEnabled(true);
+
+        vendedorTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int selectedRow = vendedorTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    eliminarButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
     private class BuscarButtonListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
+                String nombre = nombreField.getText();
+                String apellido = apellidoField.getText();
+                String sucursal = sucursalField.getText();
                 String codigo = codigoField.getText();
 
                 VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
-                Vendedor vendedor = vendedorDao.obtenerVendedor(codigo);
+                java.util.List<Vendedor> vendedores = vendedorDao.getVendedores(codigo, nombre, apellido, sucursal);
 
-                if (vendedor != null) {
-                    Object[][] data = {
-                        {vendedor.getCuit(), vendedor.getSucursal(), vendedor.getNombre(), vendedor.getApellido(), vendedor.getDni(), vendedor.getTelefono(), vendedor.getEmail()}
-                    };
-                    vendedorTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
-                    ));
-                    eliminarButton.setEnabled(true);  // Habilita el botón eliminar
+                if (!vendedores.isEmpty()) {
+                    Object[][] data = new Object[vendedores.size()][8];
+                    for (int i = 0; i < vendedores.size(); i++) {
+                        Vendedor vendedor = vendedores.get(i);
+                        data[i] = new Object[]{
+                            vendedor.getCodigo(), vendedor.getCuit(), vendedor.getSucursal(),
+                            vendedor.getNombre(), vendedor.getApellido(), vendedor.getDni(),
+                            vendedor.getTelefono(), vendedor.getEmail()
+                        };
+                    }
+                    vendedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
+                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                 } else {
-                    Object[][] data = new Object[1][7]; // Tabla vacía
-                    vendedorTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
-                    ));
-                    JOptionPane.showMessageDialog(null, "Vendedor no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
+                    Object[][] data = new Object[0][8]; // Tabla vacía
+                    vendedorTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
+                    JOptionPane.showMessageDialog(null, "No se encontraron vendedores con esos parámetros.", "Resultado de búsqueda", JOptionPane.INFORMATION_MESSAGE);
                     eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                 }
             } catch (Exception ex) {
@@ -118,7 +154,8 @@ public class BajaVendedor extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                String codigo = codigoField.getText();
+                int selectedRow = vendedorTable.getSelectedRow();
+                String codigo = vendedorTable.getValueAt(selectedRow, 0).toString();
 
                 VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
                 Vendedor vendedor = vendedorDao.obtenerVendedor(codigo);
@@ -127,12 +164,14 @@ public class BajaVendedor extends javax.swing.JFrame {
                     int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar este vendedor?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
 
                     if (confirmacion == JOptionPane.YES_OPTION) {
-                        vendedorDao.eliminarVendedor(codigo);
+                        vendedorDao.eliminarVendedor(codigo, null, null, null);
                         JOptionPane.showMessageDialog(null, "El vendedor ha sido eliminado exitosamente.");
 
-                        vendedorTable.setModel(new javax.swing.table.DefaultTableModel(
-                                new Object[1][7], new String[]{"CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}
-                        ));
+                        // Limpiar la tabla y los campos de búsqueda
+                        vendedorTable.setModel(new DefaultTableModel(new Object[0][8], new String[]{"Código", "CUIT", "Sucursal", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
+                        nombreField.setText("");
+                        apellidoField.setText("");
+                        sucursalField.setText("");
                         codigoField.setText("");
                         eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                     } else {
@@ -147,7 +186,7 @@ public class BajaVendedor extends javax.swing.JFrame {
             }
         }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.table.DefaultTableModel;
 import modelo.vendedor.Vendedor;
 import repositorio.dao.vendedor.VendedorDaoImpl;
 import principal.vista.gente.HomeMenuGente;
@@ -14,22 +15,20 @@ public class ListarVendedor extends javax.swing.JFrame {
     private JTable vendedoresTable;
     private JTextField nombreField, apellidoField, sucursalField;
     private JButton listarButton, backButton;
-    
+
     public ListarVendedor() {
         setTitle("Listar Vendedores");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);  
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Listar Vendedores", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de filtro para nombre, apellido y sucursal
         JPanel filterPanel = new JPanel(new GridLayout(1, 7, 10, 10));
         filterPanel.add(new JLabel("Nombre:"));
         nombreField = new JTextField();
@@ -49,11 +48,10 @@ public class ListarVendedor extends javax.swing.JFrame {
 
         // Tabla para listar los vendedores
         String[] columnNames = {"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"};
-        vendedoresTable = new JTable(new Object[0][8], columnNames);
+        vendedoresTable = new JTable(new DefaultTableModel(new Object[0][8], columnNames));
         JScrollPane scrollPane = new JScrollPane(vendedoresTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Panel inferior para el botón de volver
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         backButton = new JButton("Volver");
@@ -72,28 +70,17 @@ public class ListarVendedor extends javax.swing.JFrame {
         public void actionPerformed(ActionEvent e) {
             String nombre = nombreField.getText().trim();
             String apellido = apellidoField.getText().trim();
-            String sucursal = sucursalField.getText().trim(); // Agregar el campo para sucursal
+            String sucursal = sucursalField.getText().trim();
 
-            // Si todos los campos están vacíos, se usa el método general `getVendedores`
-            if (!nombre.isEmpty() && !apellido.isEmpty() && !sucursal.isEmpty()) {
-                actualizarTablaVendedores(nombre, apellido, sucursal);  // Buscar por nombre, apellido y sucursal
-            } else if (!nombre.isEmpty()) {
-                actualizarTablaVendedoresPorNombre(nombre);  // Buscar solo por nombre
-            } else if (!apellido.isEmpty()) {
-                actualizarTablaVendedoresPorApellido(apellido);  // Buscar solo por apellido
-            } else if (!sucursal.isEmpty()) {
-                actualizarTablaVendedoresPorSucursal(sucursal);  // Buscar solo por sucursal
-            } else {
-                actualizarTablaVendedores(null, null, null);  // Si todos los campos están vacíos, traer todos los vendedores
-            }
+            actualizarTablaVendedores(nombre.isEmpty() ? null : nombre, apellido.isEmpty() ? null : apellido, sucursal.isEmpty() ? null : sucursal);
         }
     }
 
     private void actualizarTablaVendedores(String nombre, String apellido, String sucursal) {
         VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
-        List<Vendedor> vendedores = vendedorDao.getVendedores(nombre, apellido, sucursal); // Llamada al método con todos los filtros
 
-        // Convertir la lista de vendedores a una estructura de datos que la JTable pueda usar
+        List<Vendedor> vendedores = vendedorDao.getVendedores(null, nombre, apellido, sucursal);
+
         Object[][] data = new Object[vendedores.size()][8];
         for (int i = 0; i < vendedores.size(); i++) {
             Vendedor vendedor = vendedores.get(i);
@@ -107,83 +94,7 @@ public class ListarVendedor extends javax.swing.JFrame {
             data[i][7] = vendedor.getSucursal();
         }
 
-        // Establecer los datos en la tabla
-        vendedoresTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"}
-        ));
-    }
-
-    private void actualizarTablaVendedoresPorNombre(String nombre) {
-        VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
-        List<Vendedor> vendedores = vendedorDao.getVendedoresPorNombre(nombre); // Llamada al método específico por nombre
-
-        // Convertir la lista de vendedores a una estructura de datos que la JTable pueda usar
-        Object[][] data = new Object[vendedores.size()][8];
-        for (int i = 0; i < vendedores.size(); i++) {
-            Vendedor vendedor = vendedores.get(i);
-            data[i][0] = vendedor.getCodigo();
-            data[i][1] = vendedor.getCuit();
-            data[i][2] = vendedor.getNombre();
-            data[i][3] = vendedor.getApellido();
-            data[i][4] = vendedor.getDni();
-            data[i][5] = vendedor.getTelefono();
-            data[i][6] = vendedor.getEmail();
-            data[i][7] = vendedor.getSucursal();
-        }
-
-        // Establecer los datos en la tabla
-        vendedoresTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"}
-        ));
-    }
-
-    private void actualizarTablaVendedoresPorApellido(String apellido) {
-        VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
-        List<Vendedor> vendedores = vendedorDao.getVendedoresPorApellido(apellido); // Llamada al método específico por apellido
-
-        // Convertir la lista de vendedores a una estructura de datos que la JTable pueda usar
-        Object[][] data = new Object[vendedores.size()][8];
-        for (int i = 0; i < vendedores.size(); i++) {
-            Vendedor vendedor = vendedores.get(i);
-            data[i][0] = vendedor.getCodigo();
-            data[i][1] = vendedor.getCuit();
-            data[i][2] = vendedor.getNombre();
-            data[i][3] = vendedor.getApellido();
-            data[i][4] = vendedor.getDni();
-            data[i][5] = vendedor.getTelefono();
-            data[i][6] = vendedor.getEmail();
-            data[i][7] = vendedor.getSucursal();
-        }
-
-        // Establecer los datos en la tabla
-        vendedoresTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"}
-        ));
-    }
-
-    private void actualizarTablaVendedoresPorSucursal(String sucursal) {
-        VendedorDaoImpl vendedorDao = new VendedorDaoImpl();
-        List<Vendedor> vendedores = vendedorDao.getVendedoresPorSucursal(sucursal); // Llamada al método específico por sucursal
-
-        // Convertir la lista de vendedores a una estructura de datos que la JTable pueda usar
-        Object[][] data = new Object[vendedores.size()][8];
-        for (int i = 0; i < vendedores.size(); i++) {
-            Vendedor vendedor = vendedores.get(i);
-            data[i][0] = vendedor.getCodigo();
-            data[i][1] = vendedor.getCuit();
-            data[i][2] = vendedor.getNombre();
-            data[i][3] = vendedor.getApellido();
-            data[i][4] = vendedor.getDni();
-            data[i][5] = vendedor.getTelefono();
-            data[i][6] = vendedor.getEmail();
-            data[i][7] = vendedor.getSucursal();
-        }
-
-        // Establecer los datos en la tabla
-        vendedoresTable.setModel(new javax.swing.table.DefaultTableModel(
+        vendedoresTable.setModel(new DefaultTableModel(
                 data,
                 new String[]{"Código", "CUIT", "Nombre", "Apellido", "DNI", "Teléfono", "Email", "Sucursal"}
         ));

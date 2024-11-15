@@ -76,9 +76,8 @@ public class ClienteDaoImpl implements IDaoCliente{
     public void eliminarCliente(String codigo, String nombre, String apellido) {
         String sqlClientId = "SELECT id_persona FROM clientes c "
                 + "INNER JOIN personas p ON p.id = c.id_persona "
-                + "WHERE 1 = 1 ";  // Este WHERE 1 = 1 es para simplificar la adición de condiciones
+                + "WHERE 1 = 1 ";  
 
-        // Condiciones de búsqueda dinámica
         if (codigo != null && !codigo.isEmpty()) {
             sqlClientId += " AND c.codigo = ?";
         }
@@ -89,13 +88,12 @@ public class ClienteDaoImpl implements IDaoCliente{
             sqlClientId += " AND p.apellido = ?";
         }
 
-        String sqlDeletePerson = "DELETE FROM personas WHERE id = ?";  // Eliminar de personas
-        String sqlDeleteClient = "DELETE FROM clientes WHERE codigo = ?";  // Eliminar de clientes
+        String sqlDeletePerson = "DELETE FROM personas WHERE id = ?"; 
+        String sqlDeleteClient = "DELETE FROM clientes WHERE codigo = ?";  
 
         HashMap<Integer, Object> param = new HashMap<>();
-        int paramIndex = 0;  // Índice para los parámetros
+        int paramIndex = 0;  
 
-        // Añadir los parámetros según el filtro disponible
         if (codigo != null && !codigo.isEmpty()) {
             param.put(paramIndex++, codigo);
         }
@@ -106,27 +104,24 @@ public class ClienteDaoImpl implements IDaoCliente{
             param.put(paramIndex++, apellido);
         }
 
-        Integer idPersona = 0;  // Variable para almacenar el id_persona
+        Integer idPersona = 0;  
 
         conexionDb = new ConexionDb();
 
         try {
-            // Ejecutar la consulta para obtener el id_persona correspondiente
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlClientId, param);
             if (rs.next()) {
-                idPersona = rs.getInt("id_persona");  // Asignar el id_persona
+                idPersona = rs.getInt("id_persona");  
             }
 
             if (idPersona != 0) {
-                // Primero eliminar el cliente de la tabla 'clientes' usando el código
                 param.clear();
-                param.put(0, codigo);  // Pasamos el código para eliminar el cliente
+                param.put(0, codigo);  
                 int rowsDeletedClient = conexionDb.ejecutarConsultaUpdate(sqlDeleteClient, param);
 
                 if (rowsDeletedClient > 0) {
-                    // Luego eliminar la persona de la tabla 'personas'
                     param.clear();
-                    param.put(0, idPersona);  // El id_persona de la persona asociada
+                    param.put(0, idPersona); 
                     int rowsDeletedPerson = conexionDb.ejecutarConsultaUpdate(sqlDeletePerson, param);
 
                     if (rowsDeletedPerson > 0) {
@@ -150,7 +145,6 @@ public class ClienteDaoImpl implements IDaoCliente{
     public void modificarCliente(String codigo, Cliente cliente) {
         conexionDb = new ConexionDb();
 
-        // Actualizar el CUIL
         String sqlUpdateClient = "UPDATE clientes SET cuil = ? WHERE codigo = ?";
         HashMap<Integer, Object> param = new HashMap<>();
         param.put(0, cliente.getCuil());
@@ -159,7 +153,6 @@ public class ClienteDaoImpl implements IDaoCliente{
             int rowsUpdated = conexionDb.ejecutarConsultaUpdate(sqlUpdateClient, param);
 
             if (rowsUpdated > 0) {
-                // Actualizar los demás datos en la tabla personas
                 String sqlUpdatePer = "UPDATE personas SET nombre = ?, apellido = ?, dni = ?, email = ?, telefono = ? "
                         + "WHERE id = (SELECT id_persona FROM clientes WHERE codigo = ?)";
                 param.clear();
@@ -228,7 +221,6 @@ public class ClienteDaoImpl implements IDaoCliente{
                 + "INNER JOIN personas p ON p.id = c.id_persona "
                 + "WHERE 1 = 1 ";
 
-        // Se agregan estas condiciones si los parámetros no son nulos
         if (codigo != null && !codigo.isEmpty()) {
             sqlClients += " AND c.codigo = ?";
         }
@@ -244,17 +236,14 @@ public class ClienteDaoImpl implements IDaoCliente{
         try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sqlClients)) {
             int index = 1;
 
-            // El código se pase primero, si esta presente
             if (codigo != null && !codigo.isEmpty()) {
                 stmt.setString(index++, codigo);
             }
 
-            // Luego el nombre con LIKE, si esta presente
             if (nombre != null && !nombre.isEmpty()) {
                 stmt.setString(index++, "%" + nombre + "%");
             }
 
-            // Finalmente, el apellido con LIKE, si esta presente
             if (apellido != null && !apellido.isEmpty()) {
                 stmt.setString(index++, "%" + apellido + "%");
             }
@@ -308,12 +297,10 @@ public class ClienteDaoImpl implements IDaoCliente{
     // Sirve para Pedidos
     public Cliente obtenerClientePorId(int idCliente) {
         Cliente cliente = null;
-        // Consulta con JOIN entre clientes y personas
         String sql = "SELECT c.id, c.codigo, c.cuil, p.nombre, p.apellido, p.dni, p.telefono, p.email "
                 + "FROM clientes c "
                 + "INNER JOIN personas p ON c.id_persona = p.id "
-                + // Asumiendo que id_persona es la clave foránea en clientes
-                "WHERE c.id = ?"; // Consulta para obtener cliente por ID
+                + "WHERE c.id = ?"; 
 
         conexionDb = new ConexionDb();
         try {
@@ -322,11 +309,10 @@ public class ClienteDaoImpl implements IDaoCliente{
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                // Creación del objeto Cliente utilizando los datos traídos de ambas tablas
                 cliente = new Cliente(
                         rs.getString("codigo"),
                         rs.getString("cuil"),
-                        rs.getString("nombre"), // Nombre tomado desde la tabla personas
+                        rs.getString("nombre"), 
                         rs.getString("apellido"),
                         rs.getString("dni"),
                         rs.getString("telefono"),

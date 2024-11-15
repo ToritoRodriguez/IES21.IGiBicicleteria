@@ -67,16 +67,6 @@ public class ABMVendedor implements IABMVendedor {
     }
 
     @Override
-    public void bajaVendedor(String codigo) throws VendedorException {
-        if (codigo != null && !codigo.isEmpty()) {
-            iDaoVendedor.eliminarVendedor(codigo);
-            System.out.println("El Vendedor con código: " + codigo + " fue eliminado con éxito");
-        } else {
-            System.out.println("El código del vendedor a eliminar no puede ser nulo o vacío");
-        }
-    }
-
-    @Override
     public void modificarDatosVendedor(String codigo, Vendedor vendedorModificado) throws VendedorException {
         validarDatosVendedor(vendedorModificado);
 
@@ -86,15 +76,6 @@ public class ABMVendedor implements IABMVendedor {
             System.out.println("Los datos del vendedor han sido modificados correctamente");
         } else {
             System.out.println("El vendedor no existe");
-        }
-    }
-
-    @Override
-    public void listarVendedores(String codigo, String nombre, String apellido, int dni) {
-        List<Vendedor> vendedores = iDaoVendedor.getVendedores(codigo, nombre, apellido);
-
-        for (Vendedor vendedor : vendedores) {
-            System.out.println(vendedor.toString());
         }
     }
     

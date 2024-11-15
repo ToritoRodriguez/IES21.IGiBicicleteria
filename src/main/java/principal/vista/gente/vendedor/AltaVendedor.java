@@ -23,7 +23,6 @@ public class AltaVendedor extends javax.swing.JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridLayout(8, 2, 10, 10));
 
-        // Agregamos los componentes del formulario
         add(new JLabel("CUIT:"));
         cuitField = new JTextField();
         add(cuitField);

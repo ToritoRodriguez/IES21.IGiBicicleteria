@@ -23,7 +23,6 @@ public class AltaCliente extends javax.swing.JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridLayout(7, 2, 10, 10));
 
-        // Agregamos los componentes del formulario
         add(new JLabel("CUIL:"));
         cuilField = new JTextField();
         add(cuilField);

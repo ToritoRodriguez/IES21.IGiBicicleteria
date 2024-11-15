@@ -25,22 +25,20 @@ public class BajaCliente extends javax.swing.JFrame {
 
     public BajaCliente() {
         setTitle("Baja Cliente");
-        setSize(600, 300);  // Se ajusta el tamaño para que quepan todas las columnas
+        setSize(600, 300);  
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana
+        setLocationRelativeTo(null);  
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Baja Cliente", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
-        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));  // 4 filas y 2 columnas
+        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));  
         inputPanel.add(new JLabel("Código del Cliente:"));
         codigoField = new JTextField();
         inputPanel.add(codigoField);
@@ -55,30 +53,28 @@ public class BajaCliente extends javax.swing.JFrame {
 
         JButton buscarButton = new JButton("Buscar");
         buscarButton.addActionListener(new BuscarButtonListener());
-        inputPanel.add(buscarButton);  // El botón buscar debajo de la última label
+        inputPanel.add(buscarButton);  
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información del cliente en una tabla
         String[] columnNames = {"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"};
-        Object[][] data = new Object[0][7]; // Inicialmente vacío
+        Object[][] data = new Object[0][7]; 
         clienteTable = new JTable(data, columnNames);
-        clienteTable.setEnabled(false);  // Desactivar la edición de celdas
-        clienteTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  // Permitir solo una selección a la vez
-        clienteTable.addMouseListener(new PedidosTableMouseListener());  // Agregar el MouseListener
+        clienteTable.setEnabled(false);  
+        clienteTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  
+        clienteTable.addMouseListener(new PedidosTableMouseListener()); 
         JScrollPane scrollPane = new JScrollPane(clienteTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivar inicialmente
+        eliminarButton.setEnabled(false);  
         eliminarButton.addActionListener(new EliminarButtonListener());
         searchPanel.add(eliminarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         JButton backButton = new JButton("Volver");
@@ -93,21 +89,17 @@ public class BajaCliente extends javax.swing.JFrame {
 
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // Configurar la tabla
         configurarTabla();
     }
 
     private void configurarTabla() {
-        // Configuración de la tabla
-        clienteTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  // Permite seleccionar solo una fila
-        clienteTable.setEnabled(true);  // Habilitar la edición de las filas
-        clienteTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  // Permite solo una fila seleccionada
+        clienteTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  
+        clienteTable.setEnabled(true); 
+        clienteTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  
 
-        // Añadir un listener para el cambio de selección
         clienteTable.getSelectionModel().addListSelectionListener(e -> {
             int selectedRow = clienteTable.getSelectedRow();
             if (selectedRow != -1) {
-                // Al seleccionar una fila, habilitar el botón de eliminar
                 eliminarButton.setEnabled(true);
             }
         });
@@ -117,10 +109,10 @@ public class BajaCliente extends javax.swing.JFrame {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            int selectedRow = clienteTable.getSelectedRow();  // Obtener la fila seleccionada
+            int selectedRow = clienteTable.getSelectedRow(); 
             if (selectedRow != -1) {
-                String codigo = clienteTable.getValueAt(selectedRow, 0).toString();  // Obtiene el Código del cliente seleccionado
-                eliminarButton.setEnabled(true);  // Habilitar el botón eliminar
+                String codigo = clienteTable.getValueAt(selectedRow, 0).toString();
+                eliminarButton.setEnabled(true); 
             }
         }
     }
@@ -139,26 +131,25 @@ public class BajaCliente extends javax.swing.JFrame {
                 List<Cliente> clientes = clienteDao.getClientes(codigo, nombre, apellido);
 
                 if (clientes != null && !clientes.isEmpty()) {
-                    // Muestra la información de los clientes en la tabla
-                    Object[][] data = new Object[clientes.size()][7];  // Actualizado para 7 columnas
+                    Object[][] data = new Object[clientes.size()][7];  
                     for (int i = 0; i < clientes.size(); i++) {
                         Cliente cliente = clientes.get(i);
-                        data[i][0] = cliente.getCodigo();  // Código del cliente
-                        data[i][1] = cliente.getCuil();    // CUIL
-                        data[i][2] = cliente.getNombre();  // Nombre
-                        data[i][3] = cliente.getApellido(); // Apellido
-                        data[i][4] = cliente.getDni();     // DNI
-                        data[i][5] = cliente.getTelefono(); // Teléfono
-                        data[i][6] = cliente.getEmail();   // Email
+                        data[i][0] = cliente.getCodigo();  
+                        data[i][1] = cliente.getCuil();    
+                        data[i][2] = cliente.getNombre();  
+                        data[i][3] = cliente.getApellido(); 
+                        data[i][4] = cliente.getDni();     
+                        data[i][5] = cliente.getTelefono(); 
+                        data[i][6] = cliente.getEmail();  
                     }
 
                     clienteTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
-                    eliminarButton.setEnabled(false);  // Desactivar eliminar al hacer una nueva búsqueda
+                    eliminarButton.setEnabled(false);  
                 } else {
-                    Object[][] data = new Object[0][7]; // Tabla vacía
+                    Object[][] data = new Object[0][7]; 
                     clienteTable.setModel(new DefaultTableModel(data, new String[]{"Código", "CUIL", "Nombre", "Apellido", "DNI", "Teléfono", "Email"}));
                     JOptionPane.showMessageDialog(null, "Cliente(s) no encontrado(s).", "Error", JOptionPane.ERROR_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    eliminarButton.setEnabled(false);  
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -171,10 +162,10 @@ public class BajaCliente extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                int selectedRow = clienteTable.getSelectedRow();  // Obtener la fila seleccionada
+                int selectedRow = clienteTable.getSelectedRow(); 
 
-                if (selectedRow != -1) {  // Verifica si hay una fila seleccionada
-                    String codigo = clienteTable.getValueAt(selectedRow, 0).toString();  // Obtiene el Código del cliente seleccionado
+                if (selectedRow != -1) {  
+                    String codigo = clienteTable.getValueAt(selectedRow, 0).toString(); 
 
                     ClienteDaoImpl clienteDao = new ClienteDaoImpl();
 
@@ -197,7 +188,7 @@ public class BajaCliente extends javax.swing.JFrame {
                             codigoField.setText("");
                             nombreField.setText("");
                             apellidoField.setText("");
-                            eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                            eliminarButton.setEnabled(false);  
                         } else {
                             JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
                         }

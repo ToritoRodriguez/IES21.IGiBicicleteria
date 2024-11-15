@@ -46,7 +46,6 @@ public class EditarCliente extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Column names and initial empty data
         String[] columnNames = {"Campo", "Valor"};
         Object[][] data = {
             {"CUIL", ""},
@@ -57,7 +56,6 @@ public class EditarCliente extends javax.swing.JFrame {
             {"Email", ""}
         };
 
-        // Custom Table Model
         clienteTable = new JTable(new ClienteTableModel(data, columnNames));
         JScrollPane scrollPane = new JScrollPane(clienteTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
@@ -84,7 +82,6 @@ public class EditarCliente extends javax.swing.JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // Custom Table Model to make "Campo" column readonly
     private class ClienteTableModel extends AbstractTableModel {
 
         private Object[][] data;
@@ -117,7 +114,6 @@ public class EditarCliente extends javax.swing.JFrame {
 
         @Override
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            // Only make "Valor" column editable (index 1)
             return columnIndex == 1;
         }
 
