@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import modelo.producto.marca.Marca;
 import repositorio.dao.marca.MarcaDaoImpl;
-import principal.vista.gente.HomeMenuGente;
 import principal.vista.productos.HomeMenuProductos;
 
 /**
@@ -19,7 +18,8 @@ public class ListarMarca extends javax.swing.JFrame {
 
     private JTable marcaTable;
     private JButton listarButton, backButton;
-    
+    private JTextField codigoField, nombreField;
+
     public ListarMarca() {
         setTitle("Listar Marcas");
         setSize(800, 600);
@@ -34,14 +34,18 @@ public class ListarMarca extends javax.swing.JFrame {
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel de filtro para el código de la marca (opcional)
-        JPanel filterPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        // Panel de filtro para el código de la marca (opcional) y nombre
+        JPanel filterPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         filterPanel.add(new JLabel("Código de la Marca (Opcional):"));
-        JTextField codigoField = new JTextField();
+        codigoField = new JTextField();
         filterPanel.add(codigoField);
 
+        filterPanel.add(new JLabel("Nombre de la Marca (Opcional):"));
+        nombreField = new JTextField();
+        filterPanel.add(nombreField);
+
         listarButton = new JButton("Listar");
-        listarButton.addActionListener(new ListarButtonListener(codigoField));  // Pasamos el campo de código al listener
+        listarButton.addActionListener(new ListarButtonListener());  // Pasamos el campo de código al listener
         filterPanel.add(listarButton);
 
         add(filterPanel, BorderLayout.NORTH);
@@ -67,37 +71,43 @@ public class ListarMarca extends javax.swing.JFrame {
 
     private class ListarButtonListener implements ActionListener {
 
-        private JTextField codigoField;
-
-        public ListarButtonListener(JTextField codigoField) {
-            this.codigoField = codigoField;
-        }
-
         @Override
         public void actionPerformed(ActionEvent e) {
             String codigoText = codigoField.getText().trim();
-            int codigo = codigoText.isEmpty() ? 0 : Integer.parseInt(codigoText);  // Si el campo está vacío, buscará todas las marcas
-            actualizarTablaMarcas(codigo);
+            String nombreText = nombreField.getText().trim();
+
+            // Llamar al método para obtener marcas filtradas
+            actualizarTablaMarcas(codigoText.isEmpty() ? null : codigoText, nombreText.isEmpty() ? null : nombreText);
         }
     }
 
-    private void actualizarTablaMarcas(int codigo) {
+    private void actualizarTablaMarcas(String codigo, String nombre) {
         MarcaDaoImpl marcaDao = new MarcaDaoImpl();
-        List<Marca> marcas = marcaDao.getMarcas(codigo, null);  // Llamar al método para listar marcas con el código (si se proporciona)
+        List<Marca> marcas = marcaDao.getMarcas(codigo, nombre);  // Pasamos tanto código como nombre al método
 
+        // Depuración: muestra el número de marcas encontradas
+        System.out.println("Número de marcas encontradas: " + marcas.size());
+
+        // Crear los datos para la tabla
         Object[][] data = new Object[marcas.size()][2];
         for (int i = 0; i < marcas.size(); i++) {
             Marca marca = marcas.get(i);
-            data[i][0] = marca.getId();
+            data[i][0] = marca.getCodigo();  // Asegúrate de que el código se obtiene correctamente
             data[i][1] = marca.getMarca();
         }
 
+        // Si no se encontraron marcas, muestra un mensaje
+        if (marcas.size() == 0) {
+            JOptionPane.showMessageDialog(this, "No se encontraron marcas con los filtros proporcionados.");
+        }
+
+        // Actualizar la tabla con los resultados
         marcaTable.setModel(new javax.swing.table.DefaultTableModel(
                 data,
                 new String[]{"Código", "Nombre"}
         ));
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

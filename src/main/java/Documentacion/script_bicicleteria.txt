@@ -44,6 +44,7 @@ CREATE TABLE proveedores (
 -- Creamos la tabla categorias
 CREATE TABLE categorias (
     id INT AUTO_INCREMENT,
+    codigo VARCHAR(25) NOT NULL,
     categoria VARCHAR(20) NOT NULL,
     tipo VARCHAR(10) NOT NULL,
     PRIMARY KEY (id)
@@ -52,6 +53,7 @@ CREATE TABLE categorias (
 -- Creamos la tabla marcas
 CREATE TABLE marcas (
     id INT AUTO_INCREMENT,
+    codigo VARCHAR(25) NOT NULL,
     marca VARCHAR(30) NOT NULL,
     PRIMARY KEY (id)
 );
@@ -60,6 +62,7 @@ CREATE TABLE marcas (
 CREATE TABLE modelos (
     id INT AUTO_INCREMENT,
     id_marca INT NOT NULL,
+    codigo VARCHAR(25) NOT NULL,
     modelo VARCHAR(15) NOT NULL,
     descripcion TEXT NOT NULL,
     rodado VARCHAR(15),
@@ -73,6 +76,7 @@ CREATE TABLE productos (
     id_categoria INT NOT NULL,
     id_modelo INT NOT NULL,
     id_proveedor INT NOT NULL,
+    codigo VARCHAR(25) NOT NULL,
     cantidad INT NOT NULL,
     nombre TEXT NOT NULL,
     descripcion TEXT NOT NULL,
@@ -90,6 +94,7 @@ CREATE TABLE pedido (
     fecha DATE NOT NULL,
     id_vendedor INT NOT NULL,
     id_cliente INT NOT NULL,
+    codigo VARCHAR(25) NOT NULL,
     estado VARCHAR(50) NOT NULL,
     total_pedido DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (id_vendedor) REFERENCES vendedores(id), 
@@ -101,6 +106,7 @@ CREATE TABLE detalle_pedido (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_pedido INT NOT NULL,
     id_producto INT NOT NULL,
+    codigo VARCHAR(25) NOT NULL,
     cantidad INT NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,   
     descuento INT DEFAULT NULL,      

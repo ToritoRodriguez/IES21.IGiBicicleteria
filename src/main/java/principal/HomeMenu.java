@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.*;
 import principal.vista.gente.HomeMenuGente;
-import principal.vista.pedidos.HomeMenuPedidos;
 import principal.vista.productos.HomeMenuProductos;
 
 /**
@@ -61,14 +60,6 @@ public class HomeMenu extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new HomeMenuProductos().setVisible(true);
-                dispose(); 
-            }
-        });
-
-        pedidosButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new HomeMenuPedidos().setVisible(true);
                 dispose(); 
             }
         });

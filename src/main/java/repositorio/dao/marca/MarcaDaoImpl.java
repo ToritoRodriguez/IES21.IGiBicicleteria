@@ -25,14 +25,16 @@ public class MarcaDaoImpl implements IDaoMarca {
     
     @Override
     public void insertarNuevaMarca(Marca marca) throws MarcaException {
-        String nombreMarca = marca.getMarca(); 
+        String nombreMarca = marca.getMarca();
+        String codigoMarca = getProximoCodigoMarca();  // Obtener el próximo código para la marca
 
-        String sqlInsertMarca = "INSERT INTO marcas (marca) VALUES (?)";
+        String sqlInsertMarca = "INSERT INTO marcas (codigo, marca) VALUES (?, ?)";
 
         try (PreparedStatement stmtMarca = conexionDb.obtenerConexion().prepareStatement(sqlInsertMarca)) {
-            stmtMarca.setString(1, nombreMarca); 
+            stmtMarca.setString(1, codigoMarca);  // Asignar el código a la marca
+            stmtMarca.setString(2, nombreMarca);  // Asignar el nombre a la marca
 
-            int affectedRows = stmtMarca.executeUpdate(); 
+            int affectedRows = stmtMarca.executeUpdate();
             if (affectedRows > 0) {
                 System.out.println("Marca " + nombreMarca + " insertada con éxito.");
             } else {
@@ -44,74 +46,79 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
-    public void eliminarMarcaPorId(int idMarca) throws MarcaException {
-        String sqlDeleteId = "DELETE FROM marcas WHERE id = ?";
+    // Método para eliminar una marca
+    public void eliminarMarca(String codigo, String nombre) {
+        // Consulta para obtener el id de la marca con filtros opcionales
+        String sqlMarcaId = "SELECT id FROM marcas WHERE 1 = 1";
 
-        try {
-            if (idMarca != 0) {
-                if (marcaExistePorId(idMarca)) {
-                    try (PreparedStatement stmtDelete = conexionDb.obtenerConexion().prepareStatement(sqlDeleteId)) {
-                        stmtDelete.setInt(1, idMarca);
-                        int affectedRows = stmtDelete.executeUpdate();
-                        if (affectedRows > 0) {
-                            System.out.println("Marca con id " + idMarca + " eliminada exitosamente.");
-                        } else {
-                            System.out.println("No se pudo eliminar la marca con id " + idMarca);
-                        }
-                    }
-                } else {
-                    System.out.println("La marca con id " + idMarca + " no existe.");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al eliminar la marca por ID: " + e.getMessage());
+        // Agregar condiciones según los valores no nulos
+        if (codigo != null && !codigo.isEmpty()) {
+            sqlMarcaId += " AND codigo = ?";
         }
-    }
-
-    @Override
-    public void eliminarMarcaPorNombre(String nombreMarca) throws MarcaException{
-        String sqlDeleteName = "DELETE FROM marcas WHERE marca = ?";
-
-        try {
-            if (nombreMarca != null && !nombreMarca.isEmpty()) {
-                if (marcaExistePorNombre(nombreMarca)) {
-                    try (PreparedStatement stmtDelete = conexionDb.obtenerConexion().prepareStatement(sqlDeleteName)) {
-                        stmtDelete.setString(1, nombreMarca);
-                        int affectedRows = stmtDelete.executeUpdate();
-                        if (affectedRows > 0) {
-                            System.out.println("Marca con nombre " + nombreMarca + " eliminada exitosamente.");
-                        } else {
-                            System.out.println("No se pudo eliminar la marca con nombre " + nombreMarca);
-                        }
-                    }
-                } else {
-                    System.out.println("La marca con nombre " + nombreMarca + " no existe.");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al eliminar la marca por nombre: " + e.getMessage());
+        if (nombre != null && !nombre.isEmpty()) {
+            sqlMarcaId += " AND marca = ?";
         }
-    }
 
-    @Override
-    public void modificarMarca(int idMarca, Marca marcaModificada) throws MarcaException {
-        String sqlUpdateMarca = "UPDATE marcas SET marca = ? WHERE id = ?"; 
+        // Consulta para eliminar la marca por id
+        String sqlDeleteMarca = "DELETE FROM marcas WHERE id = ?";
+
+        HashMap<Integer, Object> param = new HashMap<>();
+        int paramIndex = 0;
+
+        // Agregar parámetros según los valores no nulos
+        if (codigo != null && !codigo.isEmpty()) {
+            param.put(paramIndex++, codigo);
+        }
+        if (nombre != null && !nombre.isEmpty()) {
+            param.put(paramIndex++, nombre);
+        }
+
+        Integer idMarca = null;  // Variable para almacenar el ID de la marca
+
+        conexionDb = new ConexionDb();
 
         try {
-            if (marcaExistePorId(idMarca)) {
-                try (PreparedStatement stmtUpdate = conexionDb.obtenerConexion().prepareStatement(sqlUpdateMarca)) {
-                    stmtUpdate.setString(1, marcaModificada.getMarca());
-                    stmtUpdate.setInt(2, idMarca); 
+            // Ejecutar la consulta para obtener el id de la marca
+            ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlMarcaId, param);
+            if (rs.next()) {
+                idMarca = rs.getInt("id");
 
-                    int affectedRows = stmtUpdate.executeUpdate();
-                    if (affectedRows > 0) {
-                        System.out.println("Marca con id " + idMarca + " actualizada exitosamente.");
+                // Eliminar la marca si existe
+                if (idMarca != null) {
+                    param.clear();
+                    param.put(0, idMarca);
+                    int rowsDeletedMarca = conexionDb.ejecutarConsultaUpdate(sqlDeleteMarca, param);
+
+                    // Si la marca fue eliminada
+                    if (rowsDeletedMarca > 0) {
+                        System.out.println("Marca eliminada exitosamente.");
                     } else {
-                        System.out.println("No se pudo actualizar la marca con id " + idMarca);
+                        System.out.println("No se pudo eliminar la marca con el id proporcionado.");
                     }
+                } else {
+                    System.out.println("Marca no encontrada, no se pudo eliminar.");
                 }
             } else {
-                System.out.println("La marca con id " + idMarca + " no existe.");
+                System.out.println("No se encontró la marca con los datos proporcionados.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al eliminar la marca: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void modificarMarca(String codigoMarca, Marca marcaModificada) throws MarcaException {
+        String sqlUpdateMarca = "UPDATE marcas SET marca = ? WHERE codigo = ?";
+
+        try (PreparedStatement stmtUpdate = conexionDb.obtenerConexion().prepareStatement(sqlUpdateMarca)) {
+            stmtUpdate.setString(1, marcaModificada.getMarca());
+            stmtUpdate.setString(2, codigoMarca);  // Cambiar a String para usar el código
+
+            int affectedRows = stmtUpdate.executeUpdate();
+            if (affectedRows > 0) {
+                System.out.println("Marca con código " + codigoMarca + " actualizada exitosamente.");
+            } else {
+                System.out.println("No se pudo actualizar la marca con código " + codigoMarca + " porque no existe.");
             }
         } catch (SQLException e) {
             System.out.println("Error al modificar la marca: " + e.getMessage());
@@ -119,42 +126,68 @@ public class MarcaDaoImpl implements IDaoMarca {
     }
 
     @Override
-    public Marca obtenerMarca(int idMarca) {
+    public Marca obtenerMarca(String codigoMarca, String nombreMarca) {
         Marca marca = null;
-        String sql = "SELECT * FROM marcas WHERE id = ?";
+        StringBuilder sql = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
 
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setInt(1, idMarca);
+        // Agregar filtro por código de la marca si se proporciona
+        if (codigoMarca != null && !codigoMarca.isEmpty()) {
+            sql.append(" AND codigo = ?");
+        }
+
+        // Agregar filtro por nombre de la marca si se proporciona
+        if (nombreMarca != null && !nombreMarca.isEmpty()) {
+            sql.append(" AND marca = ?");
+        }
+
+        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            // Establecer los parámetros
+            if (codigoMarca != null && !codigoMarca.isEmpty()) {
+                stmt.setString(paramIndex++, codigoMarca);
+            }
+            if (nombreMarca != null && !nombreMarca.isEmpty()) {
+                stmt.setString(paramIndex++, nombreMarca);
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                // Obtener el nombre de la marca
                 String nombre = rs.getString("marca");
 
+                // Crear la marca
                 marca = new Marca(nombre);
+                marca.setCodigo(rs.getString("codigo"));  // Asignar el código de la marca
+
+                // Inicializar la lista de modelos
                 marca.setModelos(new ArrayList<>());
             } else {
-                System.out.println("La marca con id " + idMarca + " no existe.");
+                System.out.println("No se encontró una marca con los parámetros proporcionados.");
             }
         } catch (SQLException e) {
-            System.out.println("Error al obtener la marca por id: " + e.getMessage());
+            System.out.println("Error al obtener la marca: " + e.getMessage());
         }
 
         return marca;
     }
 
     @Override
-    public List<Marca> getMarcas(int idMarca, String nombreMarca) {
+    public List<Marca> getMarcas(String codigoMarca, String nombreMarca) {
         List<Marca> marcas = new ArrayList<>();
         StringBuilder sqlQuery = new StringBuilder("SELECT * FROM marcas WHERE 1=1");
 
         HashMap<Integer, Object> param = new HashMap<>();
-        int index = 1;
+        int index = 0;
 
-        if (idMarca != 0) {
-            sqlQuery.append(" AND id = ?");
-            param.put(index++, idMarca);
+        // Filtrar por código de la marca si se proporciona
+        if (codigoMarca != null && !codigoMarca.isEmpty()) {
+            sqlQuery.append(" AND codigo = ?");
+            param.put(index++, codigoMarca);
         }
 
+        // Filtrar por nombre de la marca si se proporciona
         if (nombreMarca != null && !nombreMarca.isEmpty()) {
             sqlQuery.append(" AND marca LIKE ?");
             param.put(index++, "%" + nombreMarca + "%");
@@ -164,20 +197,11 @@ public class MarcaDaoImpl implements IDaoMarca {
             ResultSet rs = conexionDb.ejecutarConsultaSqlConParametros(sqlQuery.toString(), param);
 
             while (rs.next()) {
-                // Obtener el id de la marca
-                int id = rs.getInt("id");
-
-                // Obtener el nombre de la marca
+                String codigo = rs.getString("codigo");
                 String nombre = rs.getString("marca");
-
-                // Crear una nueva instancia de Marca
                 Marca marca = new Marca(nombre);
-                marca.setId(id);  // Asignar el id de la marca al objeto Marca
-
-                // Inicializar la lista de modelos (si es necesario en tu lógica)
+                marca.setCodigo(codigo);
                 marca.setModelos(new ArrayList<>());
-
-                // Agregar la marca a la lista
                 marcas.add(marca);
             }
 
@@ -187,59 +211,24 @@ public class MarcaDaoImpl implements IDaoMarca {
 
         return marcas;
     }
-
-    @Override
-    public List<Marca> getMarcasComboBox() {
-        List<Marca> marcas = new ArrayList<>();
-        String sqlQuery = "SELECT * FROM marcas"; // Consulta para obtener todas las marcas
+    
+    public String getProximoCodigoMarca() {
+        String sqlNextCode = "SELECT MAX(id) AS total FROM marcas";  // Consulta para obtener el máximo id
+        conexionDb = new ConexionDb();
 
         try {
-            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlQuery); // Ejecutar la consulta
-
-            while (rs.next()) {
-                // Obtener el id de la marca
-                int id = rs.getInt("id");
-
-                // Obtener el nombre de la marca
-                String nombre = rs.getString("marca");
-
-                // Crear una nueva instancia de Marca
-                Marca marca = new Marca(nombre);
-                marca.setId(id);  // Asignar el id de la marca al objeto Marca
-
-                // Inicializar la lista de modelos (si es necesario en tu lógica)
-                marca.setModelos(new ArrayList<>()); // Si necesitas los modelos asociados, lo puedes agregar aquí.
-
-                // Agregar la marca a la lista
-                marcas.add(marca);
+            ResultSet rs = conexionDb.ejecutarConsultaSql(sqlNextCode);  // Ejecutar la consulta
+            if (rs.next()) {
+                return "M-" + (rs.getInt("total") + 1);  // Retorna el próximo código de marca
             }
-
         } catch (SQLException e) {
-            System.out.println("Error al obtener la lista de marcas: " + e.getMessage());
+            System.out.println("Error al obtener el próximo código de marca: " + e.getMessage());
         }
 
-        return marcas;
+        return "M-1";  // Si no se encuentra ningún código, asigna "M-1" como código inicial
     }
     
-    public boolean marcaExistePorId(int idMarca) throws SQLException {
-        String sql = "SELECT * FROM marcas WHERE id = ?";  
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setInt(1, idMarca);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        }
-    }
-
-    public boolean marcaExistePorNombre(String nombreMarca) throws SQLException {
-        String sql = "SELECT * FROM marcas WHERE marca = ?"; 
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setString(1, nombreMarca);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        }
-    }
-    
-    @Override
+    // Borrar despues
     public Marca buscarMarcaPorNombre(String nombreMarca) {
         String sql = "SELECT * FROM marcas WHERE marca = ?";
         try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
@@ -255,20 +244,5 @@ public class MarcaDaoImpl implements IDaoMarca {
             e.printStackTrace();  // Puedes manejar la excepción aquí
         }
         return null;  // Retorna null si no se encuentra la marca o hubo un error
-    }
-    
-    public Marca obtenerMarcaPorId(int idMarca) throws SQLException {
-        String sql = "SELECT * FROM marcas WHERE id = ?";
-        try (PreparedStatement stmt = conexionDb.obtenerConexion().prepareStatement(sql)) {
-            stmt.setInt(1, idMarca);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String nombreMarca = rs.getString("marca");
-                return new Marca(idMarca, nombreMarca);
-            } else {
-                return null;  // No se encontró la marca
-            }
-        }
     }
 }

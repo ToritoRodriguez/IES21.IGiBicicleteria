@@ -8,18 +8,12 @@ import principal.vista.productos.marca.AltaMarca;
 import principal.vista.productos.marca.BajaMarca;
 import principal.vista.productos.marca.EditarMarca;
 import principal.vista.productos.marca.ListarMarca;
-import principal.vista.productos.modelo.AltaModelo;
-import principal.vista.productos.modelo.BajaModelo;
-import principal.vista.productos.modelo.EditarModelo;
-import principal.vista.productos.modelo.ListarModelo;
+
 import principal.vista.productos.categoria.AltaCategoria;
 import principal.vista.productos.categoria.BajaCategoria;
 import principal.vista.productos.categoria.EditarCategoria;
 import principal.vista.productos.categoria.ListarCategoria;
-import principal.vista.productos.productos.AltaProductos;
-import principal.vista.productos.productos.BajaProductos;
-import principal.vista.productos.productos.EditarProductos;
-import principal.vista.productos.productos.ListarProductos;
+
 
 /**
  *
@@ -103,37 +97,7 @@ public class HomeMenuProductos extends javax.swing.JFrame {
         add(optionsPanel, BorderLayout.CENTER);
 
         // Productos
-        altaProductos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AltaProductos().setVisible(true);
-                dispose();
-            }
-        });
-
-        bajaProductos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new BajaProductos().setVisible(true);
-                dispose();
-            }
-        });
-
-        modificacionProductos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new EditarProductos().setVisible(true);
-                dispose();
-            }
-        });
-
-        listadoProductos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ListarProductos().setVisible(true);
-                dispose();
-            }
-        });
+       
 
         // Marcas
         altaMarcas.addActionListener(new ActionListener() {
@@ -169,38 +133,7 @@ public class HomeMenuProductos extends javax.swing.JFrame {
         });
 
         // Modelos
-        altaModelos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AltaModelo().setVisible(true);
-                dispose();
-            }
-        });
-
-        bajaModelos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new BajaModelo().setVisible(true);
-                dispose();
-            }
-        });
-
-        modificacionModelos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new EditarModelo().setVisible(true);
-                dispose();
-            }
-        });
-
-        listadoModelos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new ListarModelo().setVisible(true);
-                dispose();
-            }
-        });
-
+        
         // Categorías
         altaCategorias.addActionListener(new ActionListener() {
             @Override

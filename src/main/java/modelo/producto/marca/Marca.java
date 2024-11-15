@@ -1,4 +1,5 @@
 package modelo.producto.marca;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,6 +10,7 @@ import java.util.List;
 public class Marca {
 
     private int id; 
+    private String codigo;
     private String marca;
     private List<Modelo> modelos;
 
@@ -16,9 +18,15 @@ public class Marca {
         this.id = id;
         this.marca = marca;
     }
-
+    
     public Marca(String marca) {
         this.marca = marca;
+        this.modelos = new ArrayList<>();
+    }
+
+    // Setter para el código
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;  // Asegúrate de que esta línea esté presente
     }
 
     public int getId() {
@@ -37,6 +45,10 @@ public class Marca {
         this.marca = marca;
     }
 
+    public String getCodigo() {
+        return codigo;
+    }
+    
     public List<Modelo> getModelos() {
         return modelos;
     }

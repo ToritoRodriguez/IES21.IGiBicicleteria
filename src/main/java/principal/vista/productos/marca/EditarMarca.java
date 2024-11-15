@@ -4,9 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.table.AbstractTableModel;
 import repositorio.dao.marca.MarcaDaoImpl;
 import modelo.producto.marca.Marca;
-import principal.vista.gente.HomeMenuGente;
 import principal.vista.productos.HomeMenuProductos;
 
 /**
@@ -19,22 +19,20 @@ public class EditarMarca extends javax.swing.JFrame {
     private JTextField codigoField;
     private JTable marcaTable;
     private JButton buscarButton, modificarButton;
-    
+
     public EditarMarca() {
         setTitle("Modificar Marca");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Modificar Marca", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -48,21 +46,23 @@ public class EditarMarca extends javax.swing.JFrame {
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información de la marca en una tabla
-        String[] columnNames = {"Código", "Nombre"};
-        Object[][] data = new Object[1][2]; // Inicialmente vacío
-        marcaTable = new JTable(data, columnNames);
+        String[] columnNames = {"Campo", "Valor"};
+        Object[][] data = {
+            {"Código", ""},
+            {"Marca", ""}
+        };
+
+        marcaTable = new JTable(new MarcaTableModel(data, columnNames));
         JScrollPane scrollPane = new JScrollPane(marcaTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         modificarButton = new JButton("Guardar Cambios");
-        modificarButton.setEnabled(false);  // Desactivar inicialmente
+        modificarButton.setEnabled(false);
         modificarButton.addActionListener(new ModificarButtonListener());
         searchPanel.add(modificarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         JButton backButton = new JButton("Volver");
@@ -78,42 +78,68 @@ public class EditarMarca extends javax.swing.JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    private class MarcaTableModel extends AbstractTableModel {
+
+        private Object[][] data;
+        private String[] columnNames;
+
+        public MarcaTableModel(Object[][] data, String[] columnNames) {
+            this.data = data;
+            this.columnNames = columnNames;
+        }
+
+        @Override
+        public int getRowCount() {
+            return data.length;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+            return columnNames[columnIndex];
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            return data[rowIndex][columnIndex];
+        }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return columnIndex == 1;
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            if (isCellEditable(rowIndex, columnIndex)) {
+                data[rowIndex][columnIndex] = aValue;
+                fireTableCellUpdated(rowIndex, columnIndex);
+            }
+        }
+    }
+
     private class BuscarButtonListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                String input = codigoField.getText().trim();  // Obtenemos el valor ingresado
-
-                if (input.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, ingrese un código de marca.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                // Verificamos si el código es un número
-                if (!input.matches("\\d+")) {
-                    JOptionPane.showMessageDialog(null, "El código debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                int codigo = Integer.parseInt(input);  // Convertimos el código a int
+                String codigo = codigoField.getText();
 
                 MarcaDaoImpl marcaDao = new MarcaDaoImpl();
-                Marca marca = marcaDao.obtenerMarcaPorId(codigo);  // Buscamos la marca por su ID (código)
+
+                Marca marca = marcaDao.obtenerMarca(codigo, null);
 
                 if (marca != null) {
-                    // Actualizamos la tabla con la información de la marca
-                    Object[][] data = {
-                        {marca.getId(), marca.getMarca()}
-                    };
-                    marcaTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"Código", "Nombre"}
-                    ));
-                    modificarButton.setEnabled(true);  // Habilitar el botón de modificar
+                    marcaTable.setValueAt(marca.getCodigo(), 0, 1);
+                    marcaTable.setValueAt(marca.getMarca(), 1, 1);
+                    modificarButton.setEnabled(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "Marca no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
-                    modificarButton.setEnabled(false);  // Desactivar el botón modificar
+                    modificarButton.setEnabled(false);
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -126,27 +152,26 @@ public class EditarMarca extends javax.swing.JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                int selectedRow = marcaTable.getSelectedRow();  // Obtener la fila seleccionada en la tabla
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(null, "Por favor, seleccione una marca para modificar.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                int codigo = (int) marcaTable.getValueAt(selectedRow, 0);  // Obtener el código de la marca
-                marcaTable.getCellEditor().stopCellEditing();
-                String nuevoNombre = (String) marcaTable.getValueAt(selectedRow, 1);  // Obtener el nuevo nombre de la marca
-
-                if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "El nombre de la marca no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+                String codigo = codigoField.getText();
 
                 MarcaDaoImpl marcaDao = new MarcaDaoImpl();
-                Marca marcaExistente = marcaDao.obtenerMarcaPorId(codigo);  // Buscar la marca en la base de datos
+
+                Marca marcaExistente = marcaDao.obtenerMarca(codigo, null);
 
                 if (marcaExistente != null) {
-                    marcaExistente.setMarca(nuevoNombre);  // Actualizar el nombre de la marca
-                    marcaDao.modificarMarca(codigo, marcaExistente);  // Guardar los cambios en la base de datos
+                    // Obtener y actualizar los campos
+                    String nuevoCodigo = (String) marcaTable.getValueAt(0, 1);
+                    if (!nuevoCodigo.isEmpty()) {
+                        marcaExistente.setCodigo(nuevoCodigo);
+                    }
+
+                    marcaTable.getCellEditor().stopCellEditing();
+                    String nuevaMarca = (String) marcaTable.getValueAt(1, 1);
+                    if (!nuevaMarca.isEmpty()) {
+                        marcaExistente.setMarca(nuevaMarca);
+                    }
+
+                    marcaDao.modificarMarca(codigo, marcaExistente);
                     JOptionPane.showMessageDialog(null, "Marca modificada con éxito.");
                 } else {
                     JOptionPane.showMessageDialog(null, "Marca no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -156,7 +181,7 @@ public class EditarMarca extends javax.swing.JFrame {
             }
         }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

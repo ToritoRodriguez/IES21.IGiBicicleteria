@@ -11,18 +11,12 @@ import negocio.abm.producto.exception.MarcaException;
 
 public interface IDaoMarca{
     public void insertarNuevaMarca(Marca marca) throws MarcaException;
+    
+    public void eliminarMarca(String codigo, String nombre);
 
-    public void eliminarMarcaPorNombre(String nombreMarca) throws MarcaException;
-    
-    public void eliminarMarcaPorId(int idMarca) throws MarcaException;
+    public void modificarMarca(String codigoMarca, Marca marcaModificada) throws MarcaException;
 
-    public void modificarMarca(int idMarca, Marca marcaModificada) throws MarcaException;
-
-    public Marca obtenerMarca(int idMarca);
+    public Marca obtenerMarca(String codigoMarca, String nombreMarca);
     
-    public Marca buscarMarcaPorNombre(String nombreMarca);
-    
-    public List<Marca> getMarcas(int idMarca, String nombreMarca);
-    
-    public List<Marca> getMarcasComboBox();
+    public List<Marca> getMarcas(String codigoMarca, String nombreMarca);
 }

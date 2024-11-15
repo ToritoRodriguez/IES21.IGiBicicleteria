@@ -4,8 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import repositorio.dao.marca.MarcaDaoImpl;
-import principal.vista.gente.HomeMenuGente;
 import modelo.producto.marca.Marca;
 import principal.vista.productos.HomeMenuProductos;
 
@@ -16,55 +18,59 @@ import principal.vista.productos.HomeMenuProductos;
 
 public class BajaMarca extends javax.swing.JFrame {
 
-    private JTextField codigoField;
+    private JTextField nombreMarcaField, codigoField;
     private JTable marcaTable;
     private JButton eliminarButton;
-    
+
     public BajaMarca() {
         setTitle("Baja Marca");
-        setSize(500, 300);
+        setSize(600, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);  // Centrar la ventana en la pantalla
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel superior para el título
         JPanel titlePanel = new JPanel();
         JLabel titleLabel = new JLabel("Baja Marca", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
-        // Panel central para el formulario de búsqueda
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
 
-        JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
-        inputPanel.add(new JLabel("Marca:"), BorderLayout.WEST);
+        // Panel de búsqueda
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));  // Cambié a GridLayout(5, 2)
+
+        inputPanel.add(new JLabel("Código:"));
         codigoField = new JTextField();
-        inputPanel.add(codigoField, BorderLayout.CENTER);
+        inputPanel.add(codigoField);
+
+        inputPanel.add(new JLabel("Nombre Marca:"));
+        nombreMarcaField = new JTextField();
+        inputPanel.add(nombreMarcaField);
 
         JButton buscarButton = new JButton("Buscar");
         buscarButton.addActionListener(new BuscarButtonListener());
-        inputPanel.add(buscarButton, BorderLayout.EAST);
+        inputPanel.add(buscarButton);  // Se añade al final del GridLayout
 
         searchPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Panel central para mostrar la información de la marca en una tabla
-        String[] columnNames = {"Código", "Nombre", "Descripción"};
-        Object[][] data = new Object[1][3]; // Inicialmente vacío
+        // Tabla de marcas
+        String[] columnNames = {"Código", "Marca"};
+        Object[][] data = new Object[0][2];  // Tabla vacía por defecto
         marcaTable = new JTable(data, columnNames);
+        configurarTabla();
         JScrollPane scrollPane = new JScrollPane(marcaTable);
         searchPanel.add(scrollPane, BorderLayout.CENTER);
 
         eliminarButton = new JButton("Eliminar");
         eliminarButton.setForeground(Color.WHITE);
         eliminarButton.setBackground(Color.RED);
-        eliminarButton.setEnabled(false);  // Desactivar inicialmente
+        eliminarButton.setEnabled(false);  // Desactivado hasta que se seleccione una fila
         eliminarButton.addActionListener(new EliminarButtonListener());
         searchPanel.add(eliminarButton, BorderLayout.SOUTH);
 
         add(searchPanel, BorderLayout.CENTER);
 
-        // Panel inferior para los botones de acción
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
         JButton backButton = new JButton("Volver");
@@ -80,45 +86,83 @@ public class BajaMarca extends javax.swing.JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    private void configurarTabla() {
+        marcaTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        marcaTable.setEnabled(true);
+
+        marcaTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent  e) {
+                int selectedRow = marcaTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    eliminarButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
     private class BuscarButtonListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                String input = codigoField.getText().trim();  // Obtenemos el valor ingresado
-
-                if (input.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, ingrese un ID o nombre.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+                String nombreMarca = nombreMarcaField.getText();
+                String codigo = codigoField.getText();
 
                 MarcaDaoImpl marcaDao = new MarcaDaoImpl();
-                Marca marca = null;
+                java.util.List<Marca> marcas = marcaDao.getMarcas(codigo, nombreMarca);
 
-                // Verificamos si el input es un número (ID) o texto (nombre)
-                if (input.matches("\\d+")) {  // Si es numérico, buscamos por ID
-                    int id = Integer.parseInt(input);  // Convertimos a int
-                    marca = marcaDao.obtenerMarca(id);
-                } else {  // Si es texto, buscamos por nombre
-                    marca = marcaDao.buscarMarcaPorNombre(input);
+                if (!marcas.isEmpty()) {
+                    Object[][] data = new Object[marcas.size()][2];
+                    for (int i = 0; i < marcas.size(); i++) {
+                        Marca marca = marcas.get(i);
+                        data[i] = new Object[]{
+                            marca.getCodigo(), 
+                            marca.getMarca() 
+                        };
+                    }
+                    marcaTable.setModel(new DefaultTableModel(data, new String[]{"Código", "Marca"}));
+                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                } else {
+                    Object[][] data = new Object[0][2]; // Tabla vacía
+                    marcaTable.setModel(new DefaultTableModel(data, new String[]{"Código", "Marca"}));
+                    JOptionPane.showMessageDialog(null, "No se encontraron marcas con esos parámetros.", "Resultado de búsqueda", JOptionPane.INFORMATION_MESSAGE);
+                    eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                 }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private class EliminarButtonListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                int selectedRow = marcaTable.getSelectedRow();
+                String codigo = marcaTable.getValueAt(selectedRow, 0).toString();
+
+                MarcaDaoImpl marcaDao = new MarcaDaoImpl();
+                Marca marca = marcaDao.obtenerMarca(codigo, null);
 
                 if (marca != null) {
-                    // Muestra la información de la marca en una tabla
-                    Object[][] data = {
-                        {marca.getId(), marca.getMarca()}
-                    };
-                    marcaTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"ID", "Nombre"}
-                    ));
-                    eliminarButton.setEnabled(true);  // Habilita el botón eliminar
+                    int confirmacion = JOptionPane.showConfirmDialog(null, "¿Está seguro de que desea eliminar esta marca?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+
+                    if (confirmacion == JOptionPane.YES_OPTION) {
+                        marcaDao.eliminarMarca(codigo, null);
+
+                        JOptionPane.showMessageDialog(null, "La marca ha sido eliminada exitosamente.");
+
+                        // Limpiar la tabla y los campos de búsqueda
+                        marcaTable.setModel(new DefaultTableModel(new Object[0][2], new String[]{"Código", "Marca"}));
+                        nombreMarcaField.setText("");
+                        codigoField.setText("");
+                        eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
+                    }
                 } else {
-                    Object[][] data = new Object[1][2]; // Tabla vacía
-                    marcaTable.setModel(new javax.swing.table.DefaultTableModel(
-                            data,
-                            new String[]{"ID", "Nombre"}
-                    ));
                     JOptionPane.showMessageDialog(null, "Marca no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
                     eliminarButton.setEnabled(false);  // Desactivar el botón eliminar
                 }
@@ -128,64 +172,6 @@ public class BajaMarca extends javax.swing.JFrame {
         }
     }
     
-    private class EliminarButtonListener implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                String input = codigoField.getText().trim();  // Obtenemos el valor ingresado
-
-                if (input.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, ingrese un ID o nombre.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                MarcaDaoImpl marcaDao = new MarcaDaoImpl();
-                Marca marca = null;
-
-                // Verificamos si el input es un número (ID) o texto (nombre)
-                if (input.matches("\\d+")) {  // Si es numérico, buscamos por ID
-                    int id = Integer.parseInt(input);  // Convertimos a int
-                    marca = marcaDao.obtenerMarca(id);
-                } else {  // Si es texto, buscamos por nombre
-                    marca = marcaDao.buscarMarcaPorNombre(input);
-                }
-
-                if (marca != null) {
-                    // Si la marca existe, pedimos confirmación para eliminarla
-                    int confirmacion = JOptionPane.showConfirmDialog(null,
-                            "¿Está seguro de que desea eliminar esta marca?",
-                            "Confirmar Eliminación",
-                            JOptionPane.YES_NO_OPTION);
-
-                    if (confirmacion == JOptionPane.YES_OPTION) {
-                        if (input.matches("\\d+")) {  // Si es por ID
-                            marcaDao.eliminarMarcaPorId(Integer.parseInt(input));
-                        } else {  // Si es por nombre
-                            marcaDao.eliminarMarcaPorNombre(input);
-                        }
-                        JOptionPane.showMessageDialog(null, "La marca ha sido eliminada exitosamente.");
-
-                        // Actualizamos la tabla y desactivamos el botón de eliminar
-                        marcaTable.setModel(new javax.swing.table.DefaultTableModel(
-                                new Object[1][2], new String[]{"ID", "Nombre"}
-                        ));
-                        codigoField.setText("");  // Limpiamos el campo de texto
-                        eliminarButton.setEnabled(false);  // Desactivamos el botón eliminar
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Eliminación cancelada.");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Marca no encontrada.", "Error", JOptionPane.ERROR_MESSAGE);
-                    eliminarButton.setEnabled(false);  // Desactivamos el botón eliminar si no se encuentra la marca
-                }
-            } catch (Exception ex) {
-                // En caso de error, mostramos el mensaje
-                JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
